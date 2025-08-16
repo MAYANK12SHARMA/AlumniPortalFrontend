@@ -1,0 +1,35 @@
+/**
+ * CSS to suppress hydration warnings specifically for browser extension attributes
+ * This helps prevent hydration mismatches caused by browser extensions
+ * injecting attributes like bis_skin_checked, __processed__, etc.
+ */
+
+/* Hide elements added by browser extensions during hydration */
+[bis_skin_checked],
+[data-lastpass-icon-root],
+[data-lastpass-root],
+[data-1password-extension],
+[data-bitwarden-extension] {
+  /* Suppress hydration warnings for these attributes */
+  --suppress-hydration-warning: true;
+}
+
+/* Ensure animations work properly after hydration */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Prevent layout shift during hydration */
+.min-h-screen {
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile */
+}
