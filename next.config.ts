@@ -11,6 +11,25 @@ const nextConfig: NextConfig = {
     // number of pages that should be kept simultaneously without being disposed
     pagesBufferLength: 2,
   },
+  images: {
+    // Allow Next Image to request images from the Django dev server
+    remotePatterns: [
+      // allow images served from Django dev server at localhost:8000
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "8000",
+        pathname: "/media/**",
+      },
+      // also allow 127.0.0.1 if sometimes used
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
+        port: "8000",
+        pathname: "/media/**",
+      },
+    ],
+  },
 };
 
 export default nextConfig;

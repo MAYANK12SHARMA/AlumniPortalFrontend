@@ -1,12 +1,17 @@
-import axios, { AxiosInstance, AxiosResponse } from "axios";
+import axios, { AxiosInstance, AxiosResponse, AxiosError } from "axios";
+import {
+  ApiResponse,
+  AuthTokens,
+  User,
+  StatSummary,
+  ProfileType,
+  DirectoryFilters,
+} from "../types";
 
-const BASE =
-  process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000/api/userprofile";
+const BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8000/api/";
 
-export async function getAdminDashboardStats(token?: string) {
-  const res = await axios.get(`${BASE}/admin/dashboard/stats/`, {
-    headers: token ? { Authorization: `JWT ${token}` } : undefined,
-  });
+export async function getAdminDashboardStats() {
+  const res = await apiClient.get("/admin/dashboard/");
   return res.data;
 }
 
@@ -17,71 +22,30 @@ export async function getDirectoryStats(token?: string) {
   return res.data;
 }
 
-export async function getRoleRequests(token?: string, page = 1) {
-  const res = await axios.get(`${BASE}/admin/role-requests/?page=${page}`, {
-    headers: token ? { Authorization: `JWT ${token}` } : undefined,
-  });
-  return res.data;
-}
-
-export type StatSummary = {
-  total_users: number;
-  total_admins: number;
-  total_students: number;
-  total_alumni: number;
-  role_requests_pending: number;
-  role_requests_accepted: number;
-  // New fields for the updated API response
-  alumni_mentors?: number;
-  alumni_referral_providers?: number;
-  students_by_program?: Array<{ program: string; count: number }>;
-  alumni_by_industry?: Array<{ industry: string; count: number }>;
-};
 
 export function mapStats(data: any): StatSummary {
   // Handle the new API response structure
-  const stats = data?.stats || {};
-  const alumni = stats?.alumni || {};
-  const students = stats?.students || {};
-
-  // Calculate total users from alumni and students
-  const totalAlumni = Number(alumni?.total ?? 0);
-  const totalStudents = Number(students?.total ?? 0);
-  const totalUsers = totalAlumni + totalStudents;
+  const metrics = data?.metrics || {};
+  const totalUsers = metrics?.total_users || {};
 
   return {
-    total_users: totalUsers,
-    total_admins: 0, // Not provided in the new API, defaulting to 0
-    total_students: totalStudents,
-    total_alumni: totalAlumni,
-    role_requests_pending: 0, // Not provided in the new API, defaulting to 0
-    role_requests_accepted: 0, // Not provided in the new API, defaulting to 0
-    // New optional fields
-    alumni_mentors: Number(alumni?.mentors ?? 0),
-    alumni_referral_providers: Number(alumni?.referral_providers ?? 0),
-    students_by_program: students?.by_program || [],
-    alumni_by_industry: alumni?.by_industry || [],
+    total_users: Number(totalUsers?.total_users ?? 0),
+    total_admins: Number(totalUsers?.admin ?? 0),
+    total_students: Number(totalUsers?.student ?? 0),
+    total_alumni: Number(totalUsers?.alumni ?? 0),
+    role_requests_pending: Number(metrics?.pending_role_requests ?? 0),
+    pending_role_requests: Number(metrics?.pending_role_requests ?? 0),
+    role_requests_accepted: 0, // Not provided in the API response
+    verified_alumni: Number(metrics?.verified_alumni ?? 0),
+    active_admins: Number(metrics?.active_admins ?? 0),
+    // Legacy fields for backward compatibility
+    alumni_mentors: 0,
+    alumni_referral_providers: 0,
+    students_by_program: [],
+    alumni_by_industry: [],
   };
 }
 import Cookies from "js-cookie";
-
-interface ApiResponse<T = any> {
-  data: T;
-  message?: string;
-  status: number;
-}
-
-interface AuthTokens {
-  access: string;
-  refresh: string;
-}
-
-interface User {
-  id: number;
-  email: string;
-  role: "student" | "alumni" | "admin";
-  profile_completed: boolean;
-}
 
 class ApiClient {
   private client: AxiosInstance;
@@ -93,8 +57,11 @@ class ApiClient {
     this.client = axios.create({
       baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api",
       timeout: 30000, // Increased to 30 seconds for registration
+      // headers: {
+      //   "Content-Type": "application/json",
+      // },
       headers: {
-        "Content-Type": "application/json",
+        Accept: "application/json",
       },
     });
 
@@ -117,8 +84,11 @@ class ApiClient {
     // Response interceptor for token refresh
     this.client.interceptors.response.use(
       (response) => response,
-      async (error) => {
+      // async (error) => {
+      //   const original = error.config;
+      async (error: AxiosError & { config?: any }) => {
         const original = error.config;
+        if (!original) return Promise.reject(error);
 
         if (error.response?.status === 401 && !original._retry) {
           original._retry = true;
@@ -138,7 +108,7 @@ class ApiClient {
           } catch (refreshError) {
             this.clearTokens();
             if (typeof window !== "undefined") {
-              window.location.href = "/auth/login";
+              window.location.href = "/login";
             }
           }
         }
@@ -285,6 +255,14 @@ class ApiClient {
     }
   }
 
+  // Profile status check (for post-activation/login flow)
+  async getProfileStatus(): Promise<
+    ApiResponse<import("../types").ProfileStatusResponse>
+  > {
+    const response = await this.client.get("/profile/status/");
+    return response as any;
+  }
+
   // Profile endpoints (NEW unified version)
   async getMyProfile(): Promise<ApiResponse<any>> {
     const response = await this.client.get("/profile/");
@@ -297,7 +275,7 @@ class ApiClient {
   }
 
   async getProfile(
-    profileType: "student" | "alumni",
+    profileType: ProfileType,
     profileId: number
   ): Promise<ApiResponse<any>> {
     const response = await this.client.get(
@@ -307,7 +285,7 @@ class ApiClient {
   }
 
   async adminUpdateProfile(
-    profileType: "student" | "alumni",
+    profileType: ProfileType,
     profileId: number,
     data: any
   ): Promise<ApiResponse<any>> {
@@ -319,14 +297,18 @@ class ApiClient {
   }
 
   // Directory endpoints
-  async getAlumniDirectory(filters: any): Promise<ApiResponse<any[]>> {
+  async getAlumniDirectory(
+    filters: DirectoryFilters
+  ): Promise<ApiResponse<any[]>> {
     const response = await this.client.get("/directory/alumni/", {
       params: filters,
     });
     return response;
   }
 
-  async getStudentDirectory(filters: any): Promise<ApiResponse<any[]>> {
+  async getStudentDirectory(
+    filters: DirectoryFilters
+  ): Promise<ApiResponse<any[]>> {
     const response = await this.client.get("/directory/students/", {
       params: filters,
     });

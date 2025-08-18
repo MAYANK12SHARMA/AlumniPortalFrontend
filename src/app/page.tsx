@@ -21,7 +21,7 @@ export default function HomePage() {
         }
       } else {
         // Redirect to login if not authenticated
-        router.push("/auth/login");
+        router.push("/login");
       }
     }
   }, [user, loading, router]);
@@ -43,13 +43,13 @@ export default function HomePage() {
         </p>
         <div className="space-x-4">
           <button
-            onClick={() => router.push("/auth/login")}
+            onClick={() => router.push("/login")}
             className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
           >
             Login
           </button>
           <button
-            onClick={() => router.push("/auth/register")}
+            onClick={() => router.push("/egister")}
             className="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700"
           >
             Register

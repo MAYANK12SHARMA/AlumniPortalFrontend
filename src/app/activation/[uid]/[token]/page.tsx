@@ -22,7 +22,7 @@ export default function ActivationRedirectPage() {
     } else {
       console.error("Missing parameters for activation:", { uid, token });
       // If parameters are missing, redirect to registration
-      router.replace("/auth/register");
+      router.replace("/register");
     }
   }, [params, router]);
 

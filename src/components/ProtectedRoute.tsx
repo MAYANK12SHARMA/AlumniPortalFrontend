@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import HydrationSafe from "./HydrationSafe";
 
@@ -24,11 +24,12 @@ const LoadingSpinner = () => (
 export default function ProtectedRoute({
   children,
   requireAuth = true,
-  redirectTo = "/auth/login",
+  redirectTo = "/login",
   allowedRoles,
 }: ProtectedRouteProps) {
-  const { user, loading, isAuthenticated } = useAuth();
+  const { user, loading, isAuthenticated, routeAfterAuthCheck } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -61,6 +62,16 @@ export default function ProtectedRoute({
       router.push("/unauthorized");
       return;
     }
+
+    // Enforce profile status gating on dashboard routes
+    if (requireAuth && isAuthenticated && pathname?.startsWith("/dashboard")) {
+      (async () => {
+        const route = await routeAfterAuthCheck();
+        if (route && route !== pathname) {
+          router.push(route);
+        }
+      })();
+    }
   }, [
     user,
     loading,
@@ -70,6 +81,8 @@ export default function ProtectedRoute({
     allowedRoles,
     router,
     isClient,
+    pathname,
+    routeAfterAuthCheck,
   ]);
 
   // Return the hydration-safe content

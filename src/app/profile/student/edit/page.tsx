@@ -1,0 +1,75 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
+import { StudentProfileWizard } from "@/components/profile/student/StudentProfileWizard";
+import { studentProfileApi } from "@/lib/api/profile";
+import { StudentProfile } from "@/types";
+import { Card } from "@/components/ui/card";
+
+export default function StudentProfileEditPage() {
+  const router = useRouter();
+  const [profileData, setProfileData] = useState<StudentProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const profile = await studentProfileApi.get();
+        setProfileData(profile);
+      } catch (error: any) {
+        console.error("Error fetching profile:", error);
+        if (error.response?.status === 404) {
+          // No profile exists, redirect to create
+          router.push("/profile/student/create");
+        } else {
+          setError("Failed to load profile");
+          toast.error("Failed to load profile");
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [router]);
+
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <Card className="p-8">
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <Card className="p-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">Error</h1>
+            <p className="text-gray-600 mb-4">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              Try Again
+            </button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!profileData) {
+    return null;
+  }
+
+  return <StudentProfileWizard initialData={profileData} isEditing={true} />;
+}

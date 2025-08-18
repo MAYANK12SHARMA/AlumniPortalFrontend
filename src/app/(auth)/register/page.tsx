@@ -232,7 +232,7 @@ export default function RegisterPage() {
             <p className="mt-6 text-xs text-zinc-500">
               Already have an account?
               <Link
-                href="/auth/login"
+                href="/login"
                 className="ml-1 text-yellow-300 hover:underline"
               >
                 Sign in
@@ -283,7 +283,7 @@ export default function RegisterPage() {
                       <div className="flex items-center justify-center gap-2">
                         <ArrowLeft size={14} />
                         <Link
-                          href="/auth/login"
+                          href="/login"
                           className="text-sm text-yellow-300 hover:underline"
                         >
                           Back to Login

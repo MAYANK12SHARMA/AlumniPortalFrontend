@@ -1,0 +1,700 @@
+{
+  "info": {
+    "name": "Alumni Portal - Profile Management API",
+    "description": "Complete API collection for Student and Alumni profile management",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8000/api",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "your_jwt_token_here",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{jwt_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Set Authorization header for all requests",
+          "if (pm.variables.get('jwt_token')) {",
+          "    pm.request.headers.add({",
+          "        key: 'Authorization',",
+          "        value: 'JWT ' + pm.variables.get('jwt_token')",
+          "    });",
+          "}"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Student Profile",
+      "item": [
+        {
+          "name": "Get Student Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/student/profile/",
+              "host": ["{{baseUrl}}"],
+              "path": ["student", "profile", ""]
+            },
+            "description": "Retrieve the current user's student profile"
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/student/profile/",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["student", "profile", ""]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"program\": \"btech\",\n  \"current_semester\": 6,\n  \"batch_year\": 2021,\n  \"cgpa\": 8.5,\n  \"bio\": \"Passionate about software development and AI\",\n  \"profile_picture\": \"https://example.com/media/profiles/john_doe.jpg\",\n  \"phone\": \"+1-555-123-4567\",\n  \"location\": \"San Francisco, CA\",\n  \"technical_skills\": [\"JavaScript\", \"Python\", \"React\", \"Django\"],\n  \"soft_skills\": [\"Communication\", \"Leadership\", \"Problem Solving\"],\n  \"interests\": [\"AI/ML\", \"Web Development\", \"Startup\"],\n  \"career_goals\": \"Become a software engineer at a tech company\",\n  \"preferred_job_types\": [\"full_time\", \"internship\"],\n  \"preferred_locations\": [\"San Francisco, CA\", \"Remote\"],\n  \"has_internship_experience\": true,\n  \"internship_details\": \"3-month internship at TechCorp as a software developer\",\n  \"certifications\": [\"AWS Cloud Practitioner\", \"Google Analytics\"],\n  \"academic_achievements\": \"Dean's List, Best Project Award\",\n  \"major_coursework\": [\"Data Structures\", \"Algorithms\", \"Web Development\"],\n  \"extracurricular_activities\": \"Tech Club President, Hackathon Winner\",\n  \"expected_graduation\": \"2024-05-15\",\n  \"is_public\": true,\n  \"created_at\": \"2024-01-15T10:30:00Z\",\n  \"updated_at\": \"2024-01-20T14:22:00Z\"\n}"
+            }
+          ],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has profile data', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.expect(responseJson).to.have.property('first_name');",
+                  "    pm.expect(responseJson).to.have.property('last_name');",
+                  "});",
+                  "",
+                  "pm.test('Response time is acceptable', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Student Profile (JSON)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"program\": \"btech\",\n  \"current_semester\": 6,\n  \"batch_year\": 2021,\n  \"cgpa\": 8.5,\n  \"bio\": \"Passionate about software development and AI\",\n  \"phone\": \"+1-555-123-4567\",\n  \"location\": \"San Francisco, CA\",\n  \"technical_skills\": [\"JavaScript\", \"Python\", \"React\"],\n  \"soft_skills\": [\"Communication\", \"Leadership\"],\n  \"interests\": [\"AI/ML\", \"Web Development\"],\n  \"career_goals\": \"Become a software engineer at a tech company\",\n  \"preferred_job_types\": [\"full_time\", \"internship\"],\n  \"preferred_locations\": [\"San Francisco, CA\", \"Remote\"],\n  \"has_internship_experience\": true,\n  \"internship_details\": \"3-month internship at TechCorp\",\n  \"certifications\": [\"AWS Cloud Practitioner\"],\n  \"academic_achievements\": \"Dean's List\",\n  \"major_coursework\": [\"Data Structures\", \"Algorithms\"],\n  \"extracurricular_activities\": \"Tech Club President\",\n  \"expected_graduation\": \"2024-05-15\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/student/profile/",
+              "host": ["{{baseUrl}}"],
+              "path": ["student", "profile", ""]
+            },
+            "description": "Create a new student profile with JSON data"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Profile created successfully', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.expect(responseJson.first_name).to.eql('John');",
+                  "    pm.expect(responseJson.last_name).to.eql('Doe');",
+                  "});",
+                  "",
+                  "// Store profile ID for other requests",
+                  "if (pm.response.code === 201) {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.environment.set('student_profile_id', responseJson.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Student Profile (Multipart)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "first_name",
+                  "value": "Jane",
+                  "type": "text"
+                },
+                {
+                  "key": "last_name",
+                  "value": "Smith",
+                  "type": "text"
+                },
+                {
+                  "key": "program",
+                  "value": "btech",
+                  "type": "text"
+                },
+                {
+                  "key": "current_semester",
+                  "value": "4",
+                  "type": "text"
+                },
+                {
+                  "key": "batch_year",
+                  "value": "2022",
+                  "type": "text"
+                },
+                {
+                  "key": "cgpa",
+                  "value": "9.2",
+                  "type": "text"
+                },
+                {
+                  "key": "bio",
+                  "value": "Computer Science student interested in AI and machine learning",
+                  "type": "text"
+                },
+                {
+                  "key": "technical_skills",
+                  "value": "[\"Python\", \"TensorFlow\", \"React\", \"Node.js\"]",
+                  "type": "text"
+                },
+                {
+                  "key": "soft_skills",
+                  "value": "[\"Problem Solving\", \"Team Work\", \"Communication\"]",
+                  "type": "text"
+                },
+                {
+                  "key": "interests",
+                  "value": "[\"Machine Learning\", \"Data Science\", \"Research\"]",
+                  "type": "text"
+                },
+                {
+                  "key": "profile_picture",
+                  "type": "file",
+                  "src": [],
+                  "description": "Upload a profile picture (JPG, PNG, GIF, max 5MB)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/student/profile/",
+              "host": ["{{baseUrl}}"],
+              "path": ["student", "profile", ""]
+            },
+            "description": "Create a new student profile with multipart form data including file upload"
+          }
+        },
+        {
+          "name": "Update Student Profile (Autosave)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"John Updated\",\n  \"technical_skills\": [\"JavaScript\", \"Python\", \"React\", \"Node.js\", \"TypeScript\"],\n  \"career_goals\": \"Lead a development team at a tech company\",\n  \"cgpa\": 8.7\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/student/profile/",
+              "host": ["{{baseUrl}}"],
+              "path": ["student", "profile", ""]
+            },
+            "description": "Partially update student profile (used for autosave)"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Profile updated successfully', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.first_name).to.eql('John Updated');",
+                  "    pm.expect(responseJson.cgpa).to.eql(8.7);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Student Profile",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/student/profile/",
+              "host": ["{{baseUrl}}"],
+              "path": ["student", "profile", ""]
+            },
+            "description": "Delete the current user's student profile"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 204', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});",
+                  "",
+                  "pm.test('No response body', function () {",
+                  "    pm.expect(pm.response.text()).to.be.empty;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Alumni Profile",
+      "item": [
+        {
+          "name": "Get Alumni Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/alumni/profile/",
+              "host": ["{{baseUrl}}"],
+              "path": ["alumni", "profile", ""]
+            },
+            "description": "Retrieve the current user's alumni profile"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has alumni profile data', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('graduation_year');",
+                  "    pm.expect(responseJson).to.have.property('degree');",
+                  "    pm.expect(responseJson).to.have.property('current_company');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Alumni Profile",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "first_name",
+                  "value": "Alice",
+                  "type": "text"
+                },
+                {
+                  "key": "last_name",
+                  "value": "Johnson",
+                  "type": "text"
+                },
+                {
+                  "key": "graduation_year",
+                  "value": "2018",
+                  "type": "text"
+                },
+                {
+                  "key": "degree",
+                  "value": "btech",
+                  "type": "text"
+                },
+                {
+                  "key": "specialization",
+                  "value": "Computer Science",
+                  "type": "text"
+                },
+                {
+                  "key": "current_company",
+                  "value": "Google",
+                  "type": "text"
+                },
+                {
+                  "key": "current_position",
+                  "value": "Senior Software Engineer",
+                  "type": "text"
+                },
+                {
+                  "key": "industry",
+                  "value": "technology",
+                  "type": "text"
+                },
+                {
+                  "key": "experience_years",
+                  "value": "5-10",
+                  "type": "text"
+                },
+                {
+                  "key": "bio",
+                  "value": "Experienced software engineer passionate about mentoring and building scalable systems",
+                  "type": "text"
+                },
+                {
+                  "key": "location",
+                  "value": "Mountain View, CA",
+                  "type": "text"
+                },
+                {
+                  "key": "phone_number",
+                  "value": "+1-555-987-6543",
+                  "type": "text"
+                },
+                {
+                  "key": "linkedin_url",
+                  "value": "https://linkedin.com/in/alicejohnson",
+                  "type": "text"
+                },
+                {
+                  "key": "expertise_areas",
+                  "value": "[\"Full Stack Development\", \"Cloud Architecture\", \"Team Leadership\"]",
+                  "type": "text"
+                },
+                {
+                  "key": "willing_to_mentor",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "can_provide_referrals",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "preferred_mentoring_topics",
+                  "value": "[\"Career Planning\", \"Technical Skills\", \"Interview Preparation\"]",
+                  "type": "text"
+                },
+                {
+                  "key": "available_for_networking",
+                  "value": "true",
+                  "type": "text"
+                },
+                {
+                  "key": "preferred_communication",
+                  "value": "[\"email\", \"video_call\", \"linkedin\"]",
+                  "type": "text"
+                },
+                {
+                  "key": "notable_achievements",
+                  "value": "Led migration to microservices architecture, increased team productivity by 40%, mentored 15+ junior engineers",
+                  "type": "text"
+                },
+                {
+                  "key": "profile_picture",
+                  "type": "file",
+                  "src": [],
+                  "description": "Upload a professional profile picture"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/alumni/profile/",
+              "host": ["{{baseUrl}}"],
+              "path": ["alumni", "profile", ""]
+            },
+            "description": "Create a new alumni profile"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Alumni profile created successfully', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson).to.have.property('id');",
+                  "    pm.expect(responseJson.first_name).to.eql('Alice');",
+                  "    pm.expect(responseJson.current_company).to.eql('Google');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Alumni Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"current_position\": \"Principal Engineer\",\n  \"expertise_areas\": [\"Full Stack Development\", \"Cloud Architecture\", \"Team Leadership\", \"System Design\"],\n  \"notable_achievements\": \"Led migration to microservices, increased team productivity by 40%, mentored 15+ junior engineers, architected systems serving 10M+ users\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/alumni/profile/",
+              "host": ["{{baseUrl}}"],
+              "path": ["alumni", "profile", ""]
+            },
+            "description": "Update alumni profile information"
+          }
+        },
+        {
+          "name": "Delete Alumni Profile",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/alumni/profile/",
+              "host": ["{{baseUrl}}"],
+              "path": ["alumni", "profile", ""]
+            },
+            "description": "Delete the current user's alumni profile"
+          }
+        }
+      ]
+    },
+    {
+      "name": "File Uploads",
+      "item": [
+        {
+          "name": "Upload Profile Picture",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select an image file (JPG, PNG, GIF, max 5MB)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/upload-profile-picture/",
+              "host": ["{{baseUrl}}"],
+              "path": ["upload-profile-picture", ""]
+            },
+            "description": "Upload a profile picture and get the URL"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Upload successful', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.success).to.be.true;",
+                  "    pm.expect(responseJson).to.have.property('url');",
+                  "});",
+                  "",
+                  "// Store the uploaded image URL",
+                  "if (pm.response.code === 200) {",
+                  "    const responseJson = pm.response.json();",
+                  "    if (responseJson.success && responseJson.url) {",
+                  "        pm.environment.set('profile_picture_url', responseJson.url);",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Upload Verification Documents",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [],
+                  "description": "Select a document file (PDF, DOC, DOCX, max 10MB)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/upload-verification-docs/",
+              "host": ["{{baseUrl}}"],
+              "path": ["upload-verification-docs", ""]
+            },
+            "description": "Upload verification documents for alumni profile verification"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Document upload successful', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.success).to.be.true;",
+                  "    pm.expect(responseJson).to.have.property('url');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin Profile",
+      "item": [
+        {
+          "name": "Get Admin Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/profile/",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "profile", ""]
+            },
+            "description": "Get admin profile (admin role required)"
+          }
+        },
+        {
+          "name": "Create Admin Profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Admin\",\n  \"last_name\": \"User\",\n  \"bio\": \"System administrator\",\n  \"phone\": \"+1-555-000-0000\",\n  \"location\": \"Admin Office\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/profile/",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "profile", ""]
+            },
+            "description": "Create admin profile (admin role required)"
+          }
+        },
+        {
+          "name": "Update Admin Profile",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bio\": \"Updated admin bio\",\n  \"phone\": \"+1-555-111-1111\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/profile/",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "profile", ""]
+            },
+            "description": "Update admin profile (admin role required)"
+          }
+        },
+        {
+          "name": "Delete Admin Profile",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/profile/",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "profile", ""]
+            },
+            "description": "Delete admin profile (admin role required)"
+          }
+        }
+      ]
+    }
+  ]
+}

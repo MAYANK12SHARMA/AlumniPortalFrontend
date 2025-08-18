@@ -8,14 +8,8 @@ import React, {
   ReactNode,
 } from "react";
 import { apiClient } from "@/lib/api";
+import { User } from "@/types";
 import toast from "react-hot-toast";
-
-interface User {
-  id: number;
-  email: string;
-  role: "student" | "alumni" | "admin";
-  profile_completed: boolean;
-}
 
 interface AuthContextType {
   user: User | null;
@@ -29,6 +23,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   isAuthenticated: boolean;
+  routeAfterAuthCheck: () => Promise<string | null>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -114,6 +109,56 @@ export function AuthProvider({ children }: AuthProviderProps) {
       return false;
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Decide where to send the user based on profile status
+  const routeAfterAuthCheck = async (): Promise<string | null> => {
+    try {
+      const statusRes = await apiClient.getProfileStatus();
+      const data =
+        (statusRes.data as any).data || (statusRes as any).data?.data;
+      if (!data) return null;
+
+      const { has_profile, verification_status, message } = data;
+      const profile_type = (data.profile_type || user?.role || null) as any;
+
+      // No profile created yet: send to corresponding profile page
+      if (!has_profile) {
+        if (profile_type === "student") return "/profile/student";
+        if (profile_type === "alumni") return "/profile/alumni";
+        if (profile_type === "admin") return "/dashboard/admin"; // admins might not need a profile
+        return "/";
+      }
+
+      // Pending review: show a message and send to holding page
+      if (verification_status === "pending") {
+        toast("Your profile is under review", { icon: "⏳" });
+        return "/profile/under-review";
+      }
+
+      // Verified/approved: route to dashboard by type
+      if (
+        verification_status === "verified" ||
+        verification_status === "approved"
+      ) {
+        if (profile_type === "student") return "/dashboard/student";
+        if (profile_type === "alumni") return "/dashboard/alumni";
+        if (profile_type === "admin") return "/dashboard/admin";
+      }
+
+      // Rejected: show message and route to info page
+      if (verification_status === "rejected") {
+        toast.error(
+          message || "Your profile was rejected. Please contact administration."
+        );
+        return "/profile/rejected";
+      }
+
+      return null;
+    } catch (e) {
+      console.error("Profile status check failed", e);
+      return null;
     }
   };
 
@@ -226,7 +271,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
       // Redirect to login page
       if (typeof window !== "undefined") {
-        window.location.href = "/auth/login";
+        window.location.href = "/login";
       }
     } catch (error) {
       console.error("Logout error:", error);
@@ -261,6 +306,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     logout,
     refreshUser,
     isAuthenticated,
+    routeAfterAuthCheck,
   };
 
   // Provide consistent initial values for SSR
@@ -273,6 +319,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       logout,
       refreshUser,
       isAuthenticated: false,
+      routeAfterAuthCheck: async () => null,
     };
     return (
       <AuthContext.Provider value={ssrValue}>{children}</AuthContext.Provider>

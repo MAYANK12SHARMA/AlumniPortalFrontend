@@ -8,6 +8,7 @@ export interface ButtonProps
   asChild?: boolean;
   variant?:
     | "default"
+    | "primary"
     | "secondary"
     | "ghost"
     | "outline"
@@ -22,6 +23,8 @@ const base =
 const variants: Record<NonNullable<ButtonProps["variant"]>, string> = {
   default:
     "bg-yellow-400 text-black hover:bg-yellow-300 shadow-sm border border-yellow-500/40",
+  primary:
+    "bg-[linear-gradient(90deg,#FFD24C,#FF7A18)] text-black hover:opacity-90 shadow-sm border border-yellow-500/40",
   secondary:
     "bg-zinc-900 text-zinc-100 hover:bg-zinc-800 border border-zinc-800",
   ghost: "bg-transparent hover:bg-zinc-900/50 text-zinc-100",

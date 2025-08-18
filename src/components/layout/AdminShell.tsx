@@ -2,9 +2,31 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Menu, Users, Settings, Shield, Briefcase, School, Activity, Home, X } from "lucide-react";
+import {
+  Menu,
+  Users,
+  Settings,
+  Shield,
+  Briefcase,
+  School,
+  Activity,
+  Home,
+  X,
+  LogOut,
+} from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
-const NavItem = ({ icon: Icon, label, href, active = false }: { icon: any; label: string; href: string; active?: boolean }) => (
+const NavItem = ({
+  icon: Icon,
+  label,
+  href,
+  active = false,
+}: {
+  icon: any;
+  label: string;
+  href: string;
+  active?: boolean;
+}) => (
   <a
     href={href}
     className={cn(
@@ -21,6 +43,7 @@ const NavItem = ({ icon: Icon, label, href, active = false }: { icon: any; label
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  const { logout, user } = useAuth();
 
   return (
     <div className="min-h-screen bg-[radial-gradient(80%_120%_at_10%_10%,#0a0a0a,rgba(0,0,0,1)_70%)] text-zinc-100">
@@ -29,30 +52,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex">
         {/* Sidebar */}
-        <aside
-          className={cn(
-            "sticky top-0 h-screen w-64 shrink-0 border-r border-zinc-900/90 bg-black/60 backdrop-blur-md p-4 hidden md:block"
-          )}
-        >
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2 font-semibold">
-              <Shield size={18} className="text-yellow-400" />
-              <span>Alumni Admin</span>
-            </div>
-          </div>
-          <nav className="space-y-1">
-            <NavItem icon={Home} label="Dashboard" href="/dashboard/admin" active />
-            <NavItem icon={Users} label="Users" href="#users" />
-            <NavItem icon={Briefcase} label="Jobs" href="#jobs" />
-            <NavItem icon={School} label="Directory" href="#directory" />
-            <NavItem icon={Activity} label="Activity Logs" href="#activity" />
-            <NavItem icon={Settings} label="Settings" href="#settings" />
-          </nav>
-          <div className="mt-6 rounded-lg border border-zinc-900 bg-zinc-950/60 p-3 text-xs text-zinc-400">
-            <div className="font-medium text-zinc-300">Environment</div>
-            <div>Static mock + live APIs</div>
-          </div>
-        </aside>
+
 
         {/* Mobile Sidebar */}
         {open && (
@@ -67,18 +67,45 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                   <Shield size={18} className="text-yellow-400" />
                   <span>Alumni Admin</span>
                 </div>
-                <Button variant="outline" size="icon" onClick={() => setOpen(false)}>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => setOpen(false)}
+                >
                   <X size={16} />
                 </Button>
               </div>
               <nav className="space-y-1">
-                <NavItem icon={Home} label="Dashboard" href="/dashboard/admin" active />
+                <NavItem
+                  icon={Home}
+                  label="Dashboard"
+                  href="/dashboard/admin"
+                  active
+                />
                 <NavItem icon={Users} label="Users" href="#users" />
                 <NavItem icon={Briefcase} label="Jobs" href="#jobs" />
-                <NavItem icon={School} label="Directory" href="#directory" />
-                <NavItem icon={Activity} label="Activity Logs" href="#activity" />
+                <NavItem
+                  icon={School}
+                  label="Directory"
+                  href="/dashboard/admin/directory"
+                />
+                <NavItem
+                  icon={Activity}
+                  label="Activity Logs"
+                  href="#activity"
+                />
                 <NavItem icon={Settings} label="Settings" href="#settings" />
               </nav>
+              <div className="mt-6">
+                <Button
+                  variant="outline"
+                  onClick={logout}
+                  className="w-full flex items-center gap-2 text-zinc-300 hover:text-red-400 hover:border-red-400/50"
+                >
+                  <LogOut size={14} />
+                  Logout
+                </Button>
+              </div>
             </aside>
           </div>
         )}
@@ -88,7 +115,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           {/* Top bar */}
           <header className="sticky top-0 z-10 border-b border-zinc-900/90 bg-black/60 backdrop-blur-md">
             <div className="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3">
-              <Button variant="outline" size="icon" className="md:hidden" onClick={() => setOpen((v) => !v)}>
+              <Button
+                variant="outline"
+                size="icon"
+                className="md:hidden"
+                onClick={() => setOpen((v) => !v)}
+              >
                 <Menu size={16} />
               </Button>
               <div className="text-sm text-zinc-300">Dashboard Overview</div>
@@ -97,7 +129,18 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
                   placeholder="Search (users, jobs, achievements)"
                   className="w-64 rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 py-2 text-sm text-zinc-200 placeholder-zinc-500 outline-none focus:ring-2 focus:ring-yellow-400/40"
                 />
-                <Button size="sm">New Action</Button>
+                <div className="hidden sm:flex items-center gap-2 text-sm text-zinc-400">
+                  <span>Welcome, {user?.name || "Admin"}</span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={logout}
+                  className="flex items-center gap-2 text-zinc-300 hover:text-red-400 hover:border-red-400/50"
+                >
+                  <LogOut size={14} />
+                  <span className="hidden sm:inline">Logout</span>
+                </Button>
               </div>
             </div>
           </header>
