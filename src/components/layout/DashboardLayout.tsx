@@ -5,6 +5,8 @@ import RoleSidebar from "./RoleSidebar";
 import { Button } from "@/components/ui/button";
 import { Menu, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import UserMenu from "./UserMenu";
+import HeaderBreadcrumbs from "./HeaderBreadcrumbs";
 
 export default function DashboardLayout({
   children,
@@ -56,17 +58,21 @@ export default function DashboardLayout({
               >
                 <Menu size={16} />
               </Button>
-              <div className="text-sm text-zinc-300">Dashboard</div>
+              <HeaderBreadcrumbs />
               <div className="ml-auto flex items-center gap-3">
                 <div className="hidden sm:flex items-center gap-2 text-sm text-zinc-400">
                   <span>Welcome, {user?.name || user?.email || role}</span>
                 </div>
+                <div className="hidden sm:block">
+                  <UserMenu />
+                </div>
+                {/* Fallback logout on xs screens */}
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={logout}
                   className={cn(
-                    "flex items-center gap-2 text-zinc-300 hover:text-red-400 hover:border-red-400/50"
+                    "sm:hidden flex items-center gap-2 text-zinc-300 hover:text-red-400 hover:border-red-400/50"
                   )}
                 >
                   <LogOut size={14} />

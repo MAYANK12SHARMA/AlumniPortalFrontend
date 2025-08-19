@@ -144,21 +144,17 @@ export const NAV_ITEMS: NavNode[] = [
     icon: <UserIcon size={16} />,
     roles: ["admin", "alumni", "student"],
     children: [
-      {
-        label: "Update Profile",
-        path: "/dashboard/profile/update",
-        roles: ["admin", "alumni", "student"],
-      },
+      // {
+      //   label: "Update Profile",
+      //   path: "/dashboard/profile/update",
+      //   roles: ["admin", "alumni", "student"],
+      // },
       {
         label: "View Profile",
         path: "/dashboard/profile/view",
         roles: ["admin", "alumni", "student"],
       },
-      {
-        label: "Social Links",
-        path: "/dashboard/profile/social-links",
-        roles: ["admin", "alumni", "student"],
-      },
+
     ],
   },
   {

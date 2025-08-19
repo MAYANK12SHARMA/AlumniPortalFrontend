@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 import {
   Home,
   Shield,
@@ -36,7 +36,7 @@ export type NavNode = {
 export const NAV_ITEMS: NavNode[] = [
   {
     label: "Dashboard",
-    icon: <Home size={16} />,
+    icon: React.createElement(Home, { size: 16 }),
     roles: ["admin", "alumni", "student"],
     pathByRole: {
       admin: "/dashboard/admin",
@@ -46,7 +46,7 @@ export const NAV_ITEMS: NavNode[] = [
   },
   {
     label: "Role Requests",
-    icon: <Shield size={16} />,
+    icon: React.createElement(Shield, { size: 16 }),
     roles: ["admin"],
     children: [
       {
@@ -63,7 +63,7 @@ export const NAV_ITEMS: NavNode[] = [
   },
   {
     label: "Ask Role Requests",
-    icon: <ClipboardList size={16} />,
+    icon: React.createElement(ClipboardList, { size: 16 }),
     roles: ["student"],
     children: [
       {
@@ -80,7 +80,7 @@ export const NAV_ITEMS: NavNode[] = [
   },
   {
     label: "Directory",
-    icon: <Users size={16} />,
+    icon: React.createElement(Users, { size: 16 }),
     roles: ["admin", "alumni", "student"],
     children: [
       {
@@ -97,7 +97,7 @@ export const NAV_ITEMS: NavNode[] = [
   },
   {
     label: "Opportunities",
-    icon: <Briefcase size={16} />,
+    icon: React.createElement(Briefcase, { size: 16 }),
     roles: ["admin", "alumni", "student"],
     children: [
       {
@@ -119,7 +119,7 @@ export const NAV_ITEMS: NavNode[] = [
   },
   {
     label: "Opportunity Requests",
-    icon: <FolderKanban size={16} />,
+    icon: React.createElement(FolderKanban, { size: 16 }),
     roles: ["admin"],
     children: [
       {
@@ -141,29 +141,24 @@ export const NAV_ITEMS: NavNode[] = [
   },
   {
     label: "Profile",
-    icon: <UserIcon size={16} />,
+    icon: React.createElement(UserIcon, { size: 16 }),
     roles: ["admin", "alumni", "student"],
     children: [
-      {
-        label: "Update Profile",
-        path: "/dashboard/profile/update",
-        roles: ["admin", "alumni", "student"],
-      },
+      // {
+      //   label: "Update Profile",
+      //   path: "/dashboard/profile/update",
+      //   roles: ["admin", "alumni", "student"],
+      // },
       {
         label: "View Profile",
         path: "/dashboard/profile/view",
-        roles: ["admin", "alumni", "student"],
-      },
-      {
-        label: "Social Links",
-        path: "/dashboard/profile/social-links",
         roles: ["admin", "alumni", "student"],
       },
     ],
   },
   {
     label: "Projects",
-    icon: <School size={16} />,
+    icon: React.createElement(School, { size: 16 }),
     roles: ["student", "alumni"],
     children: [
       {
@@ -180,7 +175,7 @@ export const NAV_ITEMS: NavNode[] = [
   },
   {
     label: "Achievements",
-    icon: <Trophy size={16} />,
+    icon: React.createElement(Trophy, { size: 16 }),
     roles: ["alumni"],
     children: [
       {
@@ -197,7 +192,7 @@ export const NAV_ITEMS: NavNode[] = [
   },
   {
     label: "Mentorship",
-    icon: <Handshake size={16} />,
+    icon: React.createElement(Handshake, { size: 16 }),
     roles: ["alumni", "student"],
     children: [
       {
@@ -215,7 +210,7 @@ export const NAV_ITEMS: NavNode[] = [
   // Future placeholders (space reserved)
   {
     label: "Events (coming soon)",
-    icon: <CalendarDays size={16} />,
+    icon: React.createElement(CalendarDays, { size: 16 }),
     roles: ["admin", "alumni", "student"],
     children: [
       {
@@ -229,7 +224,7 @@ export const NAV_ITEMS: NavNode[] = [
   },
   {
     label: "Resources (coming soon)",
-    icon: <BookOpen size={16} />,
+    icon: React.createElement(BookOpen, { size: 16 }),
     roles: ["admin", "alumni", "student"],
     children: [
       {

@@ -254,11 +254,11 @@ export default function AdminApprovedRoleRequestsPage() {
     <ProtectedRoute requireAuth allowedRoles={["admin"]}>
       <div className="space-y-4">
         {/* Breadcrumb */}
-        <div className="text-xs text-zinc-400">
+        {/* <div className="text-xs text-zinc-400">
           <span className="text-zinc-500">dashboard</span>
           <span className="mx-2">›</span>
           <span className="text-zinc-300">dashboard/role-request/approved</span>
-        </div>
+        </div> */}
 
         <Card>
           <CardHeader className="flex items-center justify-between">

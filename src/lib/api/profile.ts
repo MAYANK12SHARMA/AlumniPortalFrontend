@@ -198,6 +198,30 @@ export const alumniProfileApi = {
   },
 };
 
+/* ---------------- Admin Profile API ---------------- */
+export const adminProfileApi = {
+  get: async (): Promise<AdminProfile> => {
+    const response = await apiClient.get("/admin/profile/");
+    return unwrapResponse<AdminProfile>(response);
+  },
+
+  create: async (data: FormData | Partial<AdminProfile>): Promise<AdminProfile> => {
+    const response = await apiClient.post("/admin/profile/", data as any);
+    return unwrapResponse<AdminProfile>(response);
+  },
+
+  update: async (
+    data: Partial<AdminProfile> | FormData
+  ): Promise<AdminProfile> => {
+    const response = await apiClient.patch("/admin/profile/", data as any);
+    return unwrapResponse<AdminProfile>(response);
+  },
+
+  delete: async (): Promise<void> => {
+    await apiClient.delete("/admin/profile/");
+  },
+};
+
 /* ---------------- File Upload API ---------------- */
 
 async function handleUpload(endpoint: string, formData: FormData) {

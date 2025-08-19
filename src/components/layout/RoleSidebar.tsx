@@ -29,12 +29,12 @@ export default function RoleSidebar({ role, onNavigate, className }: Props) {
   // Auto-open any section that contains the active route
   useEffect(() => {
     const nextOpen: Record<string, boolean> = {};
-    navForRole(role).forEach((node) => {
+    navForRole(role).forEach((node: NavNode) => {
       if (!node.children) return;
-      const leaves = (node.children || []).filter((c) =>
+      const leaves = (node.children || []).filter((c: any) =>
         c.roles?.includes(role)
       );
-      const anyActive = leaves.some((c) => activeMatch(c.path));
+      const anyActive = leaves.some((c: any) => activeMatch(c.path));
       if (anyActive) nextOpen[node.label] = true;
     });
     setOpen((o) => ({ ...o, ...nextOpen }));
@@ -87,22 +87,28 @@ export default function RoleSidebar({ role, onNavigate, className }: Props) {
           }
 
           // Section with children
-          const leaves = (node.children || []).filter((c) =>
+          const leaves = (node.children || []).filter((c: any) =>
             c.roles?.includes(role)
           );
-          const anyActive = leaves.some((c) => activeMatch(c.path));
+          const anyActive = leaves.some((c: any) => activeMatch(c.path));
           return (
             <div key={key}>
               <button
                 onClick={() => toggle(key)}
                 className={cn(
                   "w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors border",
-                  anyActive || isOpen
+                  anyActive
+                    ? "bg-yellow-400 text-black shadow border-yellow-500/50"
+                    : isOpen
                     ? "bg-zinc-900 text-zinc-100 border-zinc-800"
                     : "text-zinc-300 hover:bg-zinc-900 hover:text-zinc-100 border-transparent"
                 )}
               >
-                <span className="text-yellow-400">{node.icon}</span>
+                <span
+                  className={cn(anyActive ? "text-black" : "text-yellow-400")}
+                >
+                  {node.icon}
+                </span>
                 <span className="flex-1 text-left">{node.label}</span>
                 <ChevronDown
                   size={16}
@@ -114,7 +120,7 @@ export default function RoleSidebar({ role, onNavigate, className }: Props) {
               </button>
               {isOpen || anyActive ? (
                 <ul className="mt-1 ml-2 space-y-1">
-                  {leaves.map((leaf) => {
+                  {leaves.map((leaf: any) => {
                     const blocked = leaf.path === "#";
                     return (
                       <li key={leaf.label}>
