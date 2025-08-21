@@ -2,9 +2,7 @@
 
 import { AxiosResponse } from "axios";
 import {
-  AuthTokens,
   User,
-  ApiResponse,
   AuthLoginRequest,
   AuthRegisterRequest,
   AuthActivationRequest,

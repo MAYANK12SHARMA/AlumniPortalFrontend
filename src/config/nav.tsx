@@ -154,7 +154,6 @@ export const NAV_ITEMS: NavNode[] = [
         path: "/dashboard/profile/view",
         roles: ["admin", "alumni", "student"],
       },
-
     ],
   },
   {
@@ -208,20 +207,27 @@ export const NAV_ITEMS: NavNode[] = [
       },
     ],
   },
-  // Future placeholders (space reserved)
   {
-    label: "Events (coming soon)",
+    label: "Events",
     icon: <CalendarDays size={16} />,
     roles: ["admin", "alumni", "student"],
     children: [
       {
-        label: "Campus Events",
-        path: "#",
+        label: "Create",
+        path: "/dashboard/events/create",
         roles: ["admin", "alumni", "student"],
-        requiresApi: true,
+      },
+      {
+        label: "My Submissions",
+        path: "/dashboard/events/mine",
+        roles: ["admin", "alumni", "student"],
+      },
+      {
+        label: "Review Pending",
+        path: "/dashboard/events/review",
+        roles: ["admin"],
       },
     ],
-    placeholder: true,
   },
   {
     label: "Resources (coming soon)",

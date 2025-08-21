@@ -53,7 +53,7 @@ export function AlumniReviewSubmitStep() {
     );
   };
 
-  const handleEditStep = (stepNumber: number) => {
+  const handleEditStep = () => {
     // This would be handled by the parent wizard component
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -83,7 +83,7 @@ export function AlumniReviewSubmitStep() {
             type="button"
             variant="ghost"
             size="sm"
-            onClick={() => handleEditStep(1)}
+            onClick={handleEditStep}
             className="text-blue-600 hover:text-blue-700"
           >
             <Edit2 className="h-4 w-4 mr-1" />
@@ -165,7 +165,7 @@ export function AlumniReviewSubmitStep() {
             type="button"
             variant="ghost"
             size="sm"
-            onClick={() => handleEditStep(2)}
+            onClick={handleEditStep}
             className="text-blue-600 hover:text-blue-700"
           >
             <Edit2 className="h-4 w-4 mr-1" />
@@ -208,7 +208,7 @@ export function AlumniReviewSubmitStep() {
             type="button"
             variant="ghost"
             size="sm"
-            onClick={() => handleEditStep(3)}
+            onClick={handleEditStep}
             className="text-blue-600 hover:text-blue-700"
           >
             <Edit2 className="h-4 w-4 mr-1" />
@@ -297,7 +297,7 @@ export function AlumniReviewSubmitStep() {
             type="button"
             variant="ghost"
             size="sm"
-            onClick={() => handleEditStep(4)}
+            onClick={handleEditStep}
             className="text-blue-600 hover:text-blue-700"
           >
             <Edit2 className="h-4 w-4 mr-1" />
@@ -387,8 +387,8 @@ export function AlumniReviewSubmitStep() {
             <p className="text-sm text-yellow-700">
               Your alumni profile will be reviewed by our administrators to
               ensure authenticity. This process typically takes 1-3 business
-              days. You'll receive an email notification once your profile is
-              approved and made visible to students.
+              days. You&apos;ll receive an email notification once your profile
+              is approved and made visible to students.
             </p>
           </div>
         </div>

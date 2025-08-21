@@ -9,6 +9,7 @@ import apiClient from "@/lib/api";
 import {
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
   RefreshCw,
   X as CloseIcon,
   Eye,
@@ -16,7 +17,7 @@ import {
   XCircle,
   FileText,
   Image as ImageIcon,
-  Link as LinkIcon,
+  // Link as LinkIcon,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -296,6 +297,7 @@ export default function AdminPendingRoleRequestsPage() {
         setPreviewUrl(objUrl);
         setPreviewObjectUrl(objUrl);
       } catch (e: any) {
+        console.error("Failed to load preview", e);
         // Graceful fallback: keep original URL and show hint to open in new tab
         setPreviewError(
           "Preview is blocked by the file server. Use Open to view in a new tab."
@@ -427,6 +429,19 @@ export default function AdminPendingRoleRequestsPage() {
                                 title="View"
                               >
                                 <Eye size={14} className="mr-1" /> View
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => toggleRow(r.id)}
+                                title={expanded[r.id] ? "Collapse" : "Expand"}
+                              >
+                                {expanded[r.id] ? (
+                                  <ChevronUp size={14} className="mr-1" />
+                                ) : (
+                                  <ChevronRight size={14} className="mr-1" />
+                                )}
+                                {expanded[r.id] ? "Less" : "More"}
                               </Button>
                             </div>
                           </TD>

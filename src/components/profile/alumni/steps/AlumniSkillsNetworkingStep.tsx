@@ -81,13 +81,13 @@ export function AlumniSkillsNetworkingStep() {
     register,
     watch,
     setValue,
-    formState: { errors },
+    formState: { errors: _errors },
   } = useFormContext();
 
   const expertiseAreas = watch("expertise_areas") || [];
   const preferredMentoringTopics = watch("preferred_mentoring_topics") || [];
   const willingToMentor = watch("willing_to_mentor");
-  const canProvideReferrals = watch("can_provide_referrals");
+  // const canProvideReferrals = watch("can_provide_referrals"); // not directly used; kept for potential future logic
   const availableForNetworking = watch("available_for_networking");
   const preferredCommunication = watch("preferred_communication") || [];
   const careerPath = watch("career_path") || [];
@@ -138,7 +138,7 @@ export function AlumniSkillsNetworkingStep() {
           Skills & Networking Preferences
         </h2>
         <p className="text-gray-600 mb-6">
-          Help students understand your expertise and how you'd like to
+          Help students understand your expertise and how you&apos;d like to
           contribute to the alumni network.
         </p>
       </div>
@@ -163,7 +163,7 @@ export function AlumniSkillsNetworkingStep() {
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <span className="text-sm font-medium text-gray-700">
-              I'm willing to mentor students
+              I&apos;m willing to mentor students
             </span>
           </label>
 
@@ -179,7 +179,7 @@ export function AlumniSkillsNetworkingStep() {
           </label>
         </div>
 
-        {willingToMentor && (
+        {willingToMentor && watch("can_provide_referrals") && (
           <SkillsInput
             label="Preferred Mentoring Topics"
             value={preferredMentoringTopics}
@@ -202,7 +202,7 @@ export function AlumniSkillsNetworkingStep() {
             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
           />
           <span className="text-sm font-medium text-gray-700">
-            I'm available for networking with students and other alumni
+            I&apos;m available for networking with students and other alumni
           </span>
         </label>
 

@@ -3,7 +3,6 @@
 import { AxiosResponse } from "axios";
 import {
   StatSummary,
-  RoleRequestListResponse,
   RoleRequest,
   RoleRequestReviewRequest,
 } from "../../types";

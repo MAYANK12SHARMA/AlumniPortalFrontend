@@ -9,6 +9,7 @@ import apiClient from "@/lib/api";
 import {
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
   RefreshCw,
   X as CloseIcon,
   Eye,
@@ -122,9 +123,7 @@ export default function AdminApprovedRoleRequestsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const toggleRow = (id: number) => {
-    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
+  // Removed unused toggleRow
 
   async function openDetail(id: number) {
     setDetailLoading(true);
@@ -241,6 +240,7 @@ export default function AdminApprovedRoleRequestsPage() {
         setPreviewUrl(objUrl);
         setPreviewObjectUrl(objUrl);
       } catch (e: any) {
+        console.error("Failed to load preview", e);
         setPreviewError(
           "Preview is blocked by the file server. Use Open to view in a new tab."
         );
@@ -371,6 +371,24 @@ export default function AdminApprovedRoleRequestsPage() {
                                 title="View"
                               >
                                 <Eye size={14} className="mr-1" /> View
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  setExpanded((prev) => ({
+                                    ...prev,
+                                    [r.id]: !prev[r.id],
+                                  }))
+                                }
+                                title={expanded[r.id] ? "Collapse" : "Expand"}
+                              >
+                                {expanded[r.id] ? (
+                                  <ChevronUp size={14} className="mr-1" />
+                                ) : (
+                                  <ChevronRight size={14} className="mr-1" />
+                                )}
+                                {expanded[r.id] ? "Less" : "More"}
                               </Button>
                             </div>
                           </TD>

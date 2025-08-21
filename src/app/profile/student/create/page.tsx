@@ -10,9 +10,7 @@ import { Card } from "@/components/ui/card";
 
 export default function StudentProfileCreatePage() {
   const router = useRouter();
-  const [initialData, setInitialData] = useState<
-    Partial<StudentProfile> | undefined
-  >();
+  const initialData = undefined as Partial<StudentProfile> | undefined;
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

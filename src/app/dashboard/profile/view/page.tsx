@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { useRouter } from "next/navigation";
 import {
   adminProfileApi,
   alumniProfileApi,
@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { AiSummaryPanel } from "@/components/profile/view/AiSummaryPanel";
 import { SocialLinksGrid } from "@/components/profile/view/SocialLinksGrid";
 import { ProfileEditModal } from "@/components/profile/view/ProfileEditModal";
+import AlumniDetails from "@/components/profile/view/AlumniDetails";
 import apiClient from "@/lib/api";
 
 function formatDate(dt?: string | null) {
@@ -53,6 +54,7 @@ export default function ProfileViewPage() {
     platform: string;
     current?: any;
   } | null>(null);
+  const [targetFields, setTargetFields] = useState<string[] | null>(null);
 
   async function load() {
     setLoading(true);
@@ -144,7 +146,7 @@ export default function ProfileViewPage() {
                   <div className="lg:col-span-1 space-y-3">
                     <div className="flex items-start gap-4">
                       <div
-                        className="h-16 w-16 shrink-0 rounded-full overflow-hidden border border-zinc-800 bg-zinc-900 flex items-center justify-center text-yellow-300"
+                        className="relative h-16 w-16 shrink-0 rounded-full overflow-hidden border border-zinc-800 bg-zinc-900 flex items-center justify-center text-yellow-300"
                         aria-label="Profile avatar"
                       >
                         {(() => {
@@ -152,12 +154,12 @@ export default function ProfileViewPage() {
                             (profile as any).avatar ||
                             (profile as any).profile_picture;
                           if (typeof url === "string" && url) {
-                            // eslint-disable-next-line @next/next/no-img-element
                             return (
-                              <img
+                              <Image
                                 src={url}
                                 alt="avatar"
-                                className="h-full w-full object-cover"
+                                fill
+                                className="object-cover"
                               />
                             );
                           }
@@ -249,6 +251,7 @@ export default function ProfileViewPage() {
                             "current_position",
                             "degree",
                             "graduation_year",
+                            "experience_years",
                             "updated_at",
                           ].map((k) => (
                             <div key={k} className="space-y-1">
@@ -319,26 +322,22 @@ export default function ProfileViewPage() {
                     </div>
                   </div>
                 )}
-                {role === "alumni" && (
-                  <div className="rounded-lg border border-zinc-800 p-4 space-y-3">
-                    <div>
-                      <div className="text-[11px] uppercase tracking-wide text-zinc-400 mb-1">
-                        Bio
-                      </div>
-                      <div className="text-sm text-zinc-100 whitespace-pre-wrap">
-                        {(profile as any).bio?.trim() || "-"}
-                      </div>
-                    </div>
-                    <div>
-                      <div className="text-[11px] uppercase tracking-wide text-zinc-400 mb-1">
-                        Notable Achievements
-                      </div>
-                      <div className="text-sm text-zinc-100 whitespace-pre-wrap">
-                        {(profile as any).notable_achievements?.trim() || "-"}
-                      </div>
-                    </div>
-                  </div>
-                )}
+                {role === "alumni" ? (
+                  <AlumniDetails
+                    profile={profile}
+                    onEditSection={(keys: string[]) => {
+                      // Pre-fill modal with only these fields editable
+                      setTargetFields(keys);
+                      setSocialEdit(null);
+                      setEditOpen(true);
+                    }}
+                    onEditSocial={(platform: string, current?: any) => {
+                      setSocialEdit({ platform, current });
+                      setTargetFields(null);
+                      setEditOpen(true);
+                    }}
+                  />
+                ) : null}
                 {role === "student" && (
                   <div className="rounded-lg border border-zinc-800 p-4 space-y-3">
                     <div>
@@ -370,6 +369,7 @@ export default function ProfileViewPage() {
           role={role as UserRole}
           initial={profile as any}
           socialEdit={socialEdit}
+          targetFields={targetFields}
           onSaved={() => {
             setEditOpen(false);
             setSocialEdit(null);

@@ -3,7 +3,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import HydrationSafe from "./HydrationSafe";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -86,30 +85,18 @@ export default function ProtectedRoute({
   ]);
 
   // Return the hydration-safe content
-  return (
-    <HydrationSafe fallback={<LoadingSpinner />}>
-      {loading ? (
-        <LoadingSpinner />
-      ) : (
-        (() => {
-          // If auth is required but user is not authenticated, don't render children
-          if (requireAuth && !isAuthenticated) {
-            return null;
-          }
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
-          // If auth is not required but user is authenticated, don't render children
-          if (!requireAuth && isAuthenticated) {
-            return null;
-          }
+  // If auth is required but user is not authenticated, render nothing (redirect effect will fire)
+  if (requireAuth && !isAuthenticated) return null;
 
-          // If role restrictions exist and user doesn't have permission, don't render
-          if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-            return null;
-          }
+  // If auth is not required but user is authenticated (e.g. login page), render nothing
+  if (!requireAuth && isAuthenticated) return null;
 
-          return <>{children}</>;
-        })()
-      )}
-    </HydrationSafe>
-  );
+  // Role check
+  if (allowedRoles && user && !allowedRoles.includes(user.role)) return null;
+
+  return <>{children}</>;
 }

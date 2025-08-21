@@ -254,27 +254,42 @@ export const fileValidation = {
     .mixed()
     .test("fileSize", "File size must be less than 5MB", (value) => {
       if (!value) return true;
-      return value.size <= 5 * 1024 * 1024; // 5MB
+      const fileLike = typeof File !== "undefined" && value instanceof File;
+      if (!fileLike && typeof value === "object" && value !== null) {
+        // Some components provide { size, type } objects
+        const maybeSize = (value as any).size;
+        if (typeof maybeSize === "number") {
+          return maybeSize <= 5 * 1024 * 1024;
+        }
+      }
+      return fileLike ? (value as File).size <= 5 * 1024 * 1024 : true;
     })
     .test("fileType", "Only image files are allowed", (value) => {
       if (!value) return true;
-      return ["image/jpeg", "image/jpg", "image/png", "image/gif"].includes(
-        value.type
-      );
+      const type = (value as any).type;
+      return ["image/jpeg", "image/jpg", "image/png", "image/gif"].includes(type);
     }),
 
   verificationDocs: yup
     .mixed()
     .test("fileSize", "File size must be less than 10MB", (value) => {
       if (!value) return true;
-      return value.size <= 10 * 1024 * 1024; // 10MB
+      const fileLike = typeof File !== "undefined" && value instanceof File;
+      if (!fileLike && typeof value === "object" && value !== null) {
+        const maybeSize = (value as any).size;
+        if (typeof maybeSize === "number") {
+          return maybeSize <= 10 * 1024 * 1024;
+        }
+      }
+      return fileLike ? (value as File).size <= 10 * 1024 * 1024 : true;
     })
     .test("fileType", "Only PDF, DOC, DOCX files are allowed", (value) => {
       if (!value) return true;
+      const type = (value as any).type;
       return [
         "application/pdf",
         "application/msword",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      ].includes(value.type);
+      ].includes(type);
     }),
 };

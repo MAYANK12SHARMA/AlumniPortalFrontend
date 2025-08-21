@@ -39,9 +39,10 @@ export interface ProfileCreateRequest {
 }
 
 // Directory requests
-export interface DirectorySearchRequest extends DirectoryFilters {
-  // Extends DirectoryFilters with any additional search parameters
-}
+// Use an intersection type instead of an empty extending interface
+export type DirectorySearchRequest = DirectoryFilters & {
+  // Additional search parameters can be added here
+};
 
 // Role request requests
 export interface RoleRequestCreateRequest {

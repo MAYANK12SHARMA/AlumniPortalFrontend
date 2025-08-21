@@ -22,7 +22,6 @@ export async function getDirectoryStats(token?: string) {
   return res.data;
 }
 
-
 export function mapStats(data: any): StatSummary {
   // Handle the new API response structure
   const metrics = data?.metrics || {};
@@ -106,6 +105,7 @@ class ApiClient {
               return this.client(original);
             }
           } catch (refreshError) {
+            console.error("Token refresh failed:", refreshError);
             this.clearTokens();
             if (typeof window !== "undefined") {
               window.location.href = "/login";

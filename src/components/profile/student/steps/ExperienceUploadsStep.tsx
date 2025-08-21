@@ -7,7 +7,6 @@ export function ExperienceUploadsStep() {
   const {
     register,
     watch,
-    setValue,
     formState: { errors },
   } = useFormContext();
 

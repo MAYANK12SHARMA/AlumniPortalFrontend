@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TBody, THead, TH, TR, TD } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -57,9 +56,8 @@ export default function AlumniDirectoryPage() {
     search: "",
     industry: "",
     location: "",
-    program: "",
-    year: undefined,
-    is_mentor: undefined,
+    graduation_year: undefined,
+    willing_to_mentor: undefined,
     can_provide_referrals: undefined,
   });
   const [directoryData, setDirectoryData] = useState<DirectoryResponse | null>(
@@ -67,33 +65,107 @@ export default function AlumniDirectoryPage() {
   );
   const [showFilters, setShowFilters] = useState(false);
 
-  // Fetch alumni directory
-  const fetchAlumniDirectory = async (searchFilters: DirectoryFilters) => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await apiClient.getAlumniDirectory(searchFilters);
-
-      if (response.data) {
-        const data = response.data as unknown as DirectoryResponse;
-        setDirectoryData(data);
-        setAlumni(data.profiles || []);
-      }
-    } catch (err: any) {
-      console.error("Error fetching alumni directory:", err);
-      setError(
-        err.response?.data?.message || "Failed to fetch alumni directory"
-      );
-    } finally {
-      setLoading(false);
+  // Map legacy keys to backend expected params
+  const mapFiltersToBackend = (f: DirectoryFilters) => {
+    const mapped: any = { ...f };
+    if (f.year && !f.graduation_year) mapped.graduation_year = f.year;
+    if (f.is_mentor !== undefined && f.willing_to_mentor === undefined) {
+      mapped.willing_to_mentor = f.is_mentor;
     }
+    delete mapped.year;
+    delete mapped.is_mentor;
+    return mapped;
   };
+
+  // Fetch alumni directory
+  const fetchAlumniDirectory = useCallback(
+    async (searchFilters: DirectoryFilters) => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const response = await apiClient.getAlumniDirectory(
+          mapFiltersToBackend(searchFilters)
+        );
+
+        const payload: any = response.data;
+        if (payload) {
+          const normalized: DirectoryResponse = {
+            profiles: payload.profiles || payload.results || [],
+            filters: {
+              programs: (payload.filter_options?.programs || []).map(
+                (v: any) => ({
+                  value: v.value || v,
+                  label: v.label || String(v),
+                  count: v.count || 0,
+                })
+              ),
+              industries: (payload.filter_options?.industries || []).map(
+                (v: any) => ({
+                  value: v.value || v,
+                  label: v.label || String(v),
+                  count: v.count || 0,
+                })
+              ),
+              locations: (payload.filter_options?.locations || []).map(
+                (v: any) => ({
+                  value: v.value || v,
+                  label: v.label || String(v),
+                  count: v.count || 0,
+                })
+              ),
+              graduation_years: (
+                payload.filter_options?.years ||
+                payload.filter_options?.graduation_years ||
+                []
+              ).map((v: any) => ({
+                value: v.value || v,
+                label: v.label || String(v),
+                count: v.count || 0,
+              })),
+            },
+            pagination: {
+              count:
+                payload.pagination?.total_count ||
+                payload.pagination?.count ||
+                0,
+              page:
+                payload.pagination?.current_page ||
+                payload.pagination?.page ||
+                1,
+              pages:
+                payload.pagination?.total_pages ||
+                payload.pagination?.pages ||
+                1,
+              page_size:
+                payload.pagination?.page_size || searchFilters.page_size || 20,
+              next: payload.pagination?.has_next
+                ? (payload.pagination?.current_page || 1) + 1
+                : undefined,
+              previous: payload.pagination?.has_previous
+                ? (payload.pagination?.current_page || 1) - 1
+                : undefined,
+            },
+          } as any;
+          setDirectoryData(normalized);
+          setAlumni(normalized.profiles as any);
+        }
+      } catch (err: any) {
+        console.error("Error fetching alumni directory:", err);
+        setError(
+          err.response?.data?.message || "Failed to fetch alumni directory"
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   // Initial load
   useEffect(() => {
     fetchAlumniDirectory(filters);
-  }, []);
+  }, [fetchAlumniDirectory, filters]);
 
   // Handle search
   const handleSearch = (searchTerm: string) => {
@@ -127,9 +199,8 @@ export default function AlumniDirectoryPage() {
       search: "",
       industry: "",
       location: "",
-      program: "",
-      year: undefined,
-      is_mentor: undefined,
+      graduation_year: undefined,
+      willing_to_mentor: undefined,
       can_provide_referrals: undefined,
     };
     setFilters(newFilters);
@@ -258,7 +329,11 @@ export default function AlumniDirectoryPage() {
                     Mentors
                   </p>
                   <div className="text-2xl font-bold">
-                    {alumni.filter((a) => a.is_mentor).length}
+                    {
+                      alumni.filter(
+                        (a) => a.is_mentor || (a as any).willing_to_mentor
+                      ).length
+                    }
                   </div>
                 </div>
               </div>
@@ -386,10 +461,10 @@ export default function AlumniDirectoryPage() {
                     Graduation Year
                   </label>
                   <select
-                    value={filters.year || ""}
+                    value={filters.graduation_year || ""}
                     onChange={(e) =>
                       handleFilterChange(
-                        "year",
+                        "graduation_year",
                         e.target.value ? parseInt(e.target.value) : undefined
                       )
                     }
@@ -407,10 +482,10 @@ export default function AlumniDirectoryPage() {
                   <label className="flex items-center">
                     <input
                       type="checkbox"
-                      checked={filters.is_mentor || false}
+                      checked={filters.willing_to_mentor || false}
                       onChange={(e) =>
                         handleFilterChange(
-                          "is_mentor",
+                          "willing_to_mentor",
                           e.target.checked || undefined
                         )
                       }

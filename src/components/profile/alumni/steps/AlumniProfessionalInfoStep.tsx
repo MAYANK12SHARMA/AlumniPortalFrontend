@@ -180,7 +180,7 @@ export function AlumniProfessionalInfoStep() {
             • Your experience level helps set realistic expectations for
             students
           </li>
-          <li>• Achievements showcase what's possible in your field</li>
+          <li>• Achievements showcase what&apos;s possible in your field</li>
           <li>• Students often seek mentors in their target industries</li>
         </ul>
       </div>

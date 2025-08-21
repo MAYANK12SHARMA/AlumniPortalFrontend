@@ -18,7 +18,6 @@ import {
   JOB_TYPE_CHOICES,
 } from "@/types";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
 
 export function ReviewSubmitStep() {
   const { watch } = useFormContext();
@@ -45,7 +44,7 @@ export function ReviewSubmitStep() {
     );
   };
 
-  const handleEditStep = (stepNumber: number) => {
+  const handleEditStep = (_stepNumber: number) => {
     // This would be handled by the parent wizard component
     // For now, we'll just scroll to top
     window.scrollTo({ top: 0, behavior: "smooth" });

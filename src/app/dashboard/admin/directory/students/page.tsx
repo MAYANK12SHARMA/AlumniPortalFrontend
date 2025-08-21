@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TBody, THead, TH, TR, TD } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -61,32 +60,35 @@ export default function StudentDirectoryPage() {
   const [showFilters, setShowFilters] = useState(false);
 
   // Fetch student directory
-  const fetchStudentDirectory = async (searchFilters: DirectoryFilters) => {
-    try {
-      setLoading(true);
-      setError(null);
+  const fetchStudentDirectory = useCallback(
+    async (searchFilters: DirectoryFilters) => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      const response = await apiClient.getStudentDirectory(searchFilters);
+        const response = await apiClient.getStudentDirectory(searchFilters);
 
-      if (response.data) {
-        const data = response.data as unknown as DirectoryResponse;
-        setDirectoryData(data);
-        setStudents(data.profiles || []);
+        if (response.data) {
+          const data = response.data as unknown as DirectoryResponse;
+          setDirectoryData(data);
+          setStudents(data.profiles || []);
+        }
+      } catch (err: any) {
+        console.error("Error fetching student directory:", err);
+        setError(
+          err.response?.data?.message || "Failed to fetch student directory"
+        );
+      } finally {
+        setLoading(false);
       }
-    } catch (err: any) {
-      console.error("Error fetching student directory:", err);
-      setError(
-        err.response?.data?.message || "Failed to fetch student directory"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+    []
+  );
 
   // Initial load
   useEffect(() => {
     fetchStudentDirectory(filters);
-  }, []);
+  }, [fetchStudentDirectory, filters]);
 
   // Handle search
   const handleSearch = (searchTerm: string) => {

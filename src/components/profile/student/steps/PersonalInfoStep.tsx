@@ -22,8 +22,8 @@ export function PersonalInfoStep() {
           Personal Information
         </h2>
         <p className="text-gray-600 mb-6">
-          Let's start with your basic information. This will help alumni and
-          peers connect with you.
+          Let&apos;s start with your basic information. This will help alumni
+          and peers connect with you.
         </p>
       </div>
 

@@ -4,3 +4,4 @@ export * from "./user";
 export * from "./profile";
 export * from "./roleRequest";
 export * from "./aiServices";
+export * from "./event";

@@ -138,7 +138,6 @@ export function StudentProfileWizard({
   const {
     handleSubmit,
     getValues,
-    setValue,
     trigger,
     formState: { isValid },
   } = methods;
@@ -175,7 +174,7 @@ export function StudentProfileWizard({
     return out;
   };
 
-  const autoSave = async () => {
+  const autoSave = useCallback(async () => {
     if (isSaving) return;
     setIsSaving(true);
     const valuesRaw = getValues();
@@ -245,7 +244,7 @@ export function StudentProfileWizard({
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [isSaving, getValues, isEditing]);
 
   // Auto-save on step change
   useEffect(() => {
@@ -254,11 +253,10 @@ export function StudentProfileWizard({
         autoSave();
       }
     }, 1000);
-
     return () => clearTimeout(saveTimeout);
-  }, [currentStep]);
+  }, [currentStep, autoSave]);
 
-  const handleNext = async () => {
+  const handleNext = useCallback(async () => {
     const isStepValid = await trigger();
 
     if (isStepValid) {
@@ -270,13 +268,13 @@ export function StudentProfileWizard({
     } else {
       toast.error("Please fix the errors before continuing");
     }
-  };
+  }, [currentStep, trigger]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
-  };
+  }, [currentStep]);
 
   // Keyboard navigation for accessibility
   const onKeyDown = useCallback(
@@ -290,7 +288,7 @@ export function StudentProfileWizard({
         handleBack();
       }
     },
-    [currentStep]
+    [handleNext, handleBack]
   );
 
   useEffect(() => {
@@ -312,7 +310,8 @@ export function StudentProfileWizard({
       console.log("Normalized data:", normalized);
 
       const fileKeys = new Set(["profile_picture"]);
-      const isRealFile = (v: any) =>
+      // Proper type guard so TS knows value is a File inside the branch
+      const isRealFile = (v: any): v is File =>
         typeof File !== "undefined" && v instanceof File;
 
       // Add all form fields
@@ -327,7 +326,7 @@ export function StudentProfileWizard({
             formData.append(key, jsonValue);
           } else if (isRealFile(value)) {
             console.log(`Appending file field ${key}:`, value);
-            formData.append(key, value);
+            formData.append(key, value as File); // value narrowed to File by type guard
           } else if (fileKeys.has(key)) {
             // skip non-file values for file fields
             console.log(
@@ -370,13 +369,12 @@ export function StudentProfileWizard({
         console.log(`${key}:`, value, typeof value);
       }
 
-      let result;
       if (isEditing || profileExists) {
         console.log("Calling studentProfileApi.update...");
-        result = await studentProfileApi.update(formData);
+        await studentProfileApi.update(formData);
       } else {
         console.log("Calling studentProfileApi.create...");
-        result = await studentProfileApi.create(formData);
+        await studentProfileApi.create(formData);
       }
 
       toast.success("Profile submitted successfully!");
@@ -399,7 +397,7 @@ export function StudentProfileWizard({
         setProfileExists(true);
         try {
           // Retry with update instead of create
-          const updateResult = await studentProfileApi.update(formData);
+          await studentProfileApi.update(formData);
           toast.success("Profile updated successfully!");
           router.push("/dashboard/student");
           return; // Exit early on success

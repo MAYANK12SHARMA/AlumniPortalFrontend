@@ -69,16 +69,25 @@ export interface DashboardStatsResponse {
 
 // Directory API types
 export interface DirectoryFilters {
+  // Common
   search?: string;
-  program?: string;
-  year?: number;
-  industry?: string;
-  company?: string;
-  location?: string;
   page?: number;
   page_size?: number;
-  is_mentor?: boolean;
+  // Alumni specific
+  industry?: string;
+  graduation_year?: number; // replaces legacy 'year'
+  experience_years?: string;
+  location?: string;
+  willing_to_mentor?: boolean; // replaces legacy 'is_mentor'
   can_provide_referrals?: boolean;
+  // Student specific
+  program?: string;
+  current_semester?: number; // could map from 'year'
+  skills?: string; // comma separated
+  // Legacy / deprecated (mapped client-side)
+  year?: number;
+  is_mentor?: boolean;
+  company?: string; // backward compatibility
 }
 
 export interface DirectoryResponse<T = any> {

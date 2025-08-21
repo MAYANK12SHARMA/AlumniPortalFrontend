@@ -2,7 +2,6 @@
 
 import { AxiosResponse } from "axios";
 import {
-  ApiResponse,
   StudentProfile,
   AlumniProfile,
   AdminProfile,
@@ -159,7 +158,7 @@ export const studentProfileApi = {
     // safe FormData detection for browsers; avoids crashing on SSR
     const isFormData =
       typeof FormData !== "undefined" && data instanceof FormData;
-
+    console.log("Is FormData:", isFormData);
     // ApiClient.patch(endpoint, data) — forward data directly
     const response = await apiClient.patch("/student/profile/", data as any);
     return unwrapResponse<StudentProfile>(response);
@@ -189,6 +188,7 @@ export const alumniProfileApi = {
     const isFormData =
       typeof FormData !== "undefined" && data instanceof FormData;
 
+    console.log("Is FormData:", isFormData);
     const response = await apiClient.patch("/alumni/profile/", data as any);
     return unwrapResponse<AlumniProfile>(response);
   },

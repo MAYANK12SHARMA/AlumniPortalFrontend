@@ -1,7 +1,7 @@
 "use client";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { AlertCircle, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 
 export default function UnderReviewPage() {
   return (
@@ -14,7 +14,7 @@ export default function UnderReviewPage() {
           <h1 className="text-xl font-semibold mb-2">Profile Under Review</h1>
           <p className="text-zinc-400">
             Your profile has been submitted and is currently under review by the
-            administrators. You'll be notified once it's approved.
+            administrators. You&apos;ll be notified once it&apos;s approved.
           </p>
         </div>
       </div>

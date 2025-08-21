@@ -22,6 +22,7 @@ export default function StudentProfileCompletionPage() {
         setHasProfile(true);
       }
     } catch (error) {
+      console.error("Failed to check profile", error);
       // No profile exists, user needs to create one
       setHasProfile(false);
     } finally {
@@ -89,7 +90,7 @@ export default function StudentProfileCompletionPage() {
               </p>
               <div className="rounded-lg border border-zinc-800 p-6 mb-6">
                 <h3 className="font-medium text-zinc-200 mb-2">
-                  What you'll need:
+                  What you&apos;ll need:
                 </h3>
                 <ul className="text-sm text-zinc-400 space-y-1">
                   <li>• Personal information and contact details</li>

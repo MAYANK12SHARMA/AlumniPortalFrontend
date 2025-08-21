@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { navForRole, Role, NavNode } from "@/config/nav";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -23,8 +23,10 @@ export default function RoleSidebar({ role, onNavigate, className }: Props) {
 
   const toggle = (key: string) => setOpen((o) => ({ ...o, [key]: !o[key] }));
 
-  const activeMatch = (path: string) =>
-    path !== "#" && pathname.startsWith(path);
+  const activeMatch = useCallback(
+    (path: string) => path !== "#" && pathname.startsWith(path),
+    [pathname]
+  );
 
   // Auto-open any section that contains the active route
   useEffect(() => {
@@ -38,7 +40,7 @@ export default function RoleSidebar({ role, onNavigate, className }: Props) {
       if (anyActive) nextOpen[node.label] = true;
     });
     setOpen((o) => ({ ...o, ...nextOpen }));
-  }, [pathname, role]);
+  }, [pathname, role, activeMatch]);
 
   return (
     <aside

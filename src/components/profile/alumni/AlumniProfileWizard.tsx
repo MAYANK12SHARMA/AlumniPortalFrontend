@@ -117,13 +117,12 @@ export function AlumniProfileWizard({
   const {
     handleSubmit,
     getValues,
-    setValue,
     trigger,
     formState: { isValid },
   } = methods;
 
   // Auto-save functionality
-  const autoSave = async () => {
+  const autoSave = useCallback(async () => {
     if (isSaving) return;
     setIsSaving(true);
     const values = getValues();
@@ -185,7 +184,7 @@ export function AlumniProfileWizard({
     } finally {
       setIsSaving(false);
     }
-  };
+  }, [getValues, isEditing, isSaving]);
 
   // Auto-save on step change
   useEffect(() => {
@@ -194,11 +193,10 @@ export function AlumniProfileWizard({
         autoSave();
       }
     }, 1000);
-
     return () => clearTimeout(saveTimeout);
-  }, [currentStep]);
+  }, [currentStep, autoSave]);
 
-  const handleNext = async () => {
+  const handleNext = useCallback(async () => {
     const isStepValid = await trigger();
 
     if (isStepValid) {
@@ -210,13 +208,13 @@ export function AlumniProfileWizard({
     } else {
       toast.error("Please fix the errors before continuing");
     }
-  };
+  }, [currentStep, trigger]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
-  };
+  }, [currentStep]);
 
   // Keyboard navigation for accessibility
   const onKeyDown = useCallback(
@@ -230,7 +228,7 @@ export function AlumniProfileWizard({
         handleBack();
       }
     },
-    [currentStep]
+    [handleBack, handleNext]
   );
 
   useEffect(() => {
@@ -258,11 +256,10 @@ export function AlumniProfileWizard({
         }
       });
 
-      let result;
       if (isEditing) {
-        result = await alumniProfileApi.update(formData);
+        await alumniProfileApi.update(formData);
       } else {
-        result = await alumniProfileApi.create(formData);
+        await alumniProfileApi.create(formData);
       }
 
       toast.success(

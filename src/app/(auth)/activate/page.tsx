@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,7 +12,7 @@ import { apiClient } from "@/lib/api";
 
 type ActivationState = "loading" | "success" | "error" | "expired";
 
-export default function ActivateAccountPage() {
+function ActivateAccountInner() {
   const [activationState, setActivationState] =
     useState<ActivationState>("loading");
   const [errorMessage, setErrorMessage] = useState("");
@@ -132,10 +132,7 @@ export default function ActivateAccountPage() {
               <br />
               You will be redirected to the login page in a few seconds.
             </p>
-            <Button
-              onClick={() => router.push("/login")}
-              className="w-full"
-            >
+            <Button onClick={() => router.push("/login")} className="w-full">
               Go to Login
             </Button>
           </div>
@@ -263,5 +260,19 @@ export default function ActivateAccountPage() {
         `}</style>
       </div>
     </ProtectedRoute>
+  );
+}
+
+export default function ActivateAccountPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center text-zinc-300">
+          Loading...
+        </div>
+      }
+    >
+      <ActivateAccountInner />
+    </Suspense>
   );
 }
