@@ -168,6 +168,21 @@ export const studentProfileApi = {
   delete: async (): Promise<void> => {
     await apiClient.delete("/student/profile/");
   },
+
+  // Manually (re)generate AI profile summary with an additional prompt
+  generateSummary: async (
+    addPrompt: string
+  ): Promise<{
+    success: boolean;
+    summary?: string;
+    last_updated?: string;
+    message?: string;
+  }> => {
+    const response = await apiClient.post("/update-ai-summary/", {
+      add_prompt: addPrompt,
+    });
+    return unwrapResponse(response);
+  },
 };
 
 /* ---------------- Alumni Profile API ---------------- */

@@ -10,16 +10,17 @@ export default function ClientCreateEvent() {
     <div className="max-w-6xl mx-auto px-4 py-10 space-y-8">
       <header className="space-y-3">
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-100">
-          Create Opportunity
+          Create Event
         </h1>
         {role === "admin" ? (
           <p className="text-sm text-zinc-400">
-            Select event type below. Internal event form coming soon. External
-            events are immediately public when created by admins.
+            Admin-created events are auto-approved and published immediately.
           </p>
         ) : (
           <p className="text-sm text-zinc-400">
-            Submit an external opportunity. It will appear after admin approval.
+            Submit an event. Your submission will remain{" "}
+            <span className="text-amber-300">pending</span> until an admin
+            reviews and approves it.
           </p>
         )}
       </header>

@@ -3,7 +3,6 @@ import {
   Home,
   Shield,
   Users,
-  Briefcase,
   School,
   ClipboardList,
   FolderKanban,
@@ -95,50 +94,7 @@ export const NAV_ITEMS: NavNode[] = [
       },
     ],
   },
-  {
-    label: "Opportunities",
-    icon: <Briefcase size={16} />,
-    roles: ["admin", "alumni", "student"],
-    children: [
-      {
-        label: "Upload Opportunity",
-        path: "/dashboard/jobs/upload",
-        roles: ["admin", "alumni"],
-      },
-      {
-        label: "Uploaded Opportunities",
-        path: "/dashboard/jobs/uploaded",
-        roles: ["admin", "alumni", "student"],
-      },
-      {
-        label: "Expired Opportunities",
-        path: "/dashboard/jobs/expired",
-        roles: ["admin", "alumni", "student"],
-      },
-    ],
-  },
-  {
-    label: "Opportunity Requests",
-    icon: <FolderKanban size={16} />,
-    roles: ["admin"],
-    children: [
-      {
-        label: "Pending Opportunities",
-        path: "/dashboard/opportunities/pending",
-        roles: ["admin"],
-      },
-      {
-        label: "Approved Opportunities",
-        path: "/dashboard/opportunities/approved",
-        roles: ["admin"],
-      },
-      {
-        label: "Expired Opportunities",
-        path: "/dashboard/opportunities/expired",
-        roles: ["admin"],
-      },
-    ],
-  },
+  // Opportunities removed per redesign request
   {
     label: "Profile",
     icon: <UserIcon size={16} />,
@@ -213,17 +169,39 @@ export const NAV_ITEMS: NavNode[] = [
     roles: ["admin", "alumni", "student"],
     children: [
       {
-        label: "Create",
+        label: "Upcoming Events",
+        path: "/dashboard/events/upcoming",
+        roles: ["admin", "alumni", "student"],
+      },
+      {
+        label: "Ongoing Events",
+        path: "/dashboard/events/ongoing",
+        roles: ["admin", "alumni", "student"],
+      },
+      {
+        label: "Expired Events",
+        path: "/dashboard/events/expired",
+        roles: ["admin", "alumni", "student"],
+      },
+    ],
+  },
+  {
+    label: "Event Requests",
+    icon: <FolderKanban size={16} />,
+    roles: ["admin", "alumni", "student"],
+    children: [
+      {
+        label: "Create Event",
         path: "/dashboard/events/create",
         roles: ["admin", "alumni", "student"],
       },
       {
-        label: "My Submissions",
+        label: "My Events",
         path: "/dashboard/events/mine",
         roles: ["admin", "alumni", "student"],
       },
       {
-        label: "Review Pending",
+        label: "Pending Events",
         path: "/dashboard/events/review",
         roles: ["admin"],
       },

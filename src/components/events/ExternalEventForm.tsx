@@ -102,7 +102,7 @@ export function ExternalEventForm({
         <div className="md:col-span-2 space-y-6">
           <Section
             title="Basic Info"
-            description="Core information about the opportunity."
+            description="Core information about the event."
           >
             <Field label="Title" error={errors.title?.message}>
               <Input
@@ -123,7 +123,7 @@ export function ExternalEventForm({
           </Section>
           <Section
             title="Details"
-            description="Provide attendees with more context."
+            description="Provide attendees with more context (agenda, speakers, goals)."
           >
             <Field label="Full Description" error={errors.description?.message}>
               <Textarea

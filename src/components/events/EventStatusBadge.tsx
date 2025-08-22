@@ -15,5 +15,14 @@ export function EventStatusBadge({
     approved: "bg-emerald-500/10 text-emerald-300 ring-emerald-500/30",
     rejected: "bg-rose-500/10 text-rose-300 ring-rose-500/30",
   };
-  return <span className={cn(base, map[status])}>{status}</span>;
+  return (
+    <span
+      className={cn(
+        base,
+        map[status] || "bg-zinc-700/30 text-zinc-300 ring-zinc-500/30"
+      )}
+    >
+      {status}
+    </span>
+  );
 }

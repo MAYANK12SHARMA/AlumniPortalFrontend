@@ -1,75 +1,61 @@
 "use client";
-
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "react-hot-toast";
+import React, { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { StudentProfileWizard } from "@/components/profile/student/StudentProfileWizard";
+import FirstTimeStudentOnboarding from "@/components/profile/student/FirstTimeStudentOnboarding";
 import { studentProfileApi } from "@/lib/api/profile";
 import { StudentProfile } from "@/types";
-import { Card } from "@/components/ui/card";
 
-export default function StudentProfileCreatePage() {
-  const router = useRouter();
-  const initialData = undefined as Partial<StudentProfile> | undefined;
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+function CreateStudentProfilePageInner() {
+  const qp = useSearchParams();
+  const step = qp.get("step") || undefined;
+  const [initial, setInitial] = useState<Partial<StudentProfile> | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkExistingProfile = async () => {
+    let mounted = true;
+    (async () => {
       try {
-        // Try to fetch existing profile
-        const existingProfile = await studentProfileApi.get();
-
-        if (existingProfile) {
-          // If profile exists, redirect to edit mode
-          router.push("/profile/student/edit");
-          return;
-        }
-      } catch (error: any) {
-        // If 404, user doesn't have a profile yet - continue with creation
-        if (error.response?.status !== 404) {
-          console.error("Error checking existing profile:", error);
-          setError("Failed to check existing profile");
-          toast.error("Failed to check existing profile");
-        }
+        const data = await studentProfileApi.get();
+        if (mounted) setInitial(data as any);
+      } catch {
       } finally {
-        setIsLoading(false);
+        if (mounted) setLoading(false);
       }
+    })();
+    return () => {
+      mounted = false;
     };
+  }, []);
 
-    checkExistingProfile();
-  }, [router]);
-
-  if (isLoading) {
+  if (loading)
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <Card className="p-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          </div>
-        </Card>
+      <div className="flex items-center justify-center py-32 text-sm text-zinc-400">
+        Loading draft...
       </div>
     );
-  }
+  return initial ? (
+    <StudentProfileWizard initialData={initial} initialStepId={step} />
+  ) : (
+    <FirstTimeStudentOnboarding />
+  );
+}
 
-  if (error) {
-    return (
-      <div className="max-w-4xl mx-auto p-6">
-        <Card className="p-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Error</h1>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              Try Again
-            </button>
-          </div>
-        </Card>
+export default function CreateStudentProfilePage() {
+  return (
+    <ProtectedRoute requireAuth allowedRoles={["student"]}>
+      <div className="min-h-screen py-10 px-4 md:px-8">
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center py-32 text-sm text-zinc-400">
+              Loading...
+            </div>
+          }
+        >
+          <CreateStudentProfilePageInner />
+        </Suspense>
       </div>
-    );
-  }
-
-  return <StudentProfileWizard initialData={initialData} isEditing={false} />;
+    </ProtectedRoute>
+  );
 }

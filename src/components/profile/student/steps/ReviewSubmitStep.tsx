@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { motion } from "framer-motion";
 import { useFormContext } from "react-hook-form";
 import {
   Edit2,
@@ -51,8 +52,13 @@ export function ReviewSubmitStep() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="relative overflow-hidden rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 via-black to-zinc-950 p-6">
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="space-y-8"
+    >
+  <div className="relative overflow-hidden rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-950 via-black to-zinc-950 p-6">
         <div className="absolute -top-16 -right-16 h-40 w-40 rounded-full bg-yellow-500/10 blur-3xl" />
         <div className="absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-orange-500/10 blur-3xl" />
         <div className="relative">
@@ -67,7 +73,7 @@ export function ReviewSubmitStep() {
       </div>
 
       {/* Personal Information Section */}
-      <div className="rounded-xl border border-zinc-800 bg-black/60 backdrop-blur p-6">
+  <div className="rounded-xl border border-zinc-800 bg-zinc-950/50 backdrop-blur p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
             <User className="h-5 w-5 text-yellow-400" />
@@ -150,7 +156,7 @@ export function ReviewSubmitStep() {
       </div>
 
       {/* Academic Information Section */}
-      <div className="rounded-xl border border-zinc-800 bg-black/60 backdrop-blur p-6">
+  <div className="rounded-xl border border-zinc-800 bg-zinc-950/50 backdrop-blur p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
             <GraduationCap className="h-5 w-5 text-yellow-400" />
@@ -233,7 +239,7 @@ export function ReviewSubmitStep() {
       </div>
 
       {/* Skills & Preferences Section */}
-      <div className="rounded-xl border border-zinc-800 bg-black/60 backdrop-blur p-6">
+  <div className="rounded-xl border border-zinc-800 bg-zinc-950/50 backdrop-blur p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-2">
             <Target className="h-5 w-5 text-yellow-400" />
@@ -404,7 +410,7 @@ export function ReviewSubmitStep() {
       </div>
 
       {/* Submission Notice */}
-      <div className="rounded-xl border border-emerald-700/40 bg-emerald-900/20 p-4">
+  <div className="rounded-xl border border-emerald-700/40 bg-emerald-900/20 p-5">
         <h3 className="text-sm font-medium text-emerald-300 mb-2">
           🎉 Ready to Submit
         </h3>
@@ -414,6 +420,6 @@ export function ReviewSubmitStep() {
           information later from your dashboard.
         </p>
       </div>
-    </div>
+  </motion.div>
   );
 }

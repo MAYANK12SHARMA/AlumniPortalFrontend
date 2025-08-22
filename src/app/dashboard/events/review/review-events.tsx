@@ -7,11 +7,13 @@ import {
 } from "@/lib/api/events";
 import type { ExternalEvent } from "@/types";
 import { Button } from "@/components/ui/button";
-import { EventStatusBadge } from "@/components/events/EventStatusBadge";
+// import { EventStatusBadge } from "@/components/events/EventStatusBadge";
+import { EventCard } from "@/components/events/EventCard";
+import { EventDetailsDialog } from "@/components/events/EventDetailsDialog";
 import toast from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+// import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 interface ModerationTarget extends ExternalEvent {
@@ -28,7 +30,7 @@ export default function ReviewEventsClient() {
   const [bulkNotes, setBulkNotes] = useState("");
   const [selected, setSelected] = useState<ExternalEvent | null>(null);
   const [notes, setNotes] = useState("");
-  const [actionLoading, setActionLoading] = useState(false);
+  // Removed actionLoading state (was not used in UI)
   const [submittingIds, setSubmittingIds] = useState<Set<number>>(new Set());
   const [selectionMode, setSelectionMode] = useState(false);
 
@@ -64,7 +66,7 @@ export default function ReviewEventsClient() {
   const moderate = useCallback(
     async (id: number, action: "approve" | "reject", notes?: string) => {
       if (submittingIds.has(id)) return; // prevent duplicate rapid clicks
-      setActionLoading(true);
+  // action start
       setSubmittingIds((s) => new Set([...s, id]));
       try {
         if (action === "approve") await approveExternalEvent(id, notes);
@@ -92,7 +94,7 @@ export default function ReviewEventsClient() {
         // fallback to reload to sync
         load();
       } finally {
-        setActionLoading(false);
+  // action end
         setSubmittingIds((s) => {
           const n = new Set(s);
           n.delete(id);
@@ -245,17 +247,28 @@ export default function ReviewEventsClient() {
       )}
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <AnimatePresence mode="popLayout">
-          {filteredList.map((evRaw) => {
-            const ev = evRaw as ModerationTarget;
-            return (
-              <motion.button
-                key={ev.id}
-                layout
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                onClick={() => {
+        {filteredList.map((evRaw) => {
+          const ev = evRaw as ModerationTarget;
+          return (
+            <div key={ev.id} className="relative">
+              {selectionMode && (
+                <button
+                  type="button"
+                  onClick={() => toggleSelect(ev.id)}
+                  className={cn(
+                    "absolute top-2 left-2 z-10 h-5 w-5 rounded border flex items-center justify-center text-[10px] font-medium",
+                    ev.selecting
+                      ? "bg-emerald-500 border-emerald-500 text-black"
+                      : "bg-zinc-900/70 border-zinc-600 text-zinc-400 hover:border-zinc-400"
+                  )}
+                  aria-pressed={!!ev.selecting}
+                >
+                  {ev.selecting ? "✓" : ""}
+                </button>
+              )}
+              <EventCard
+                event={ev}
+                onView={() => {
                   if (selectionMode) {
                     toggleSelect(ev.id);
                     return;
@@ -263,330 +276,38 @@ export default function ReviewEventsClient() {
                   setSelected(ev);
                   setNotes("");
                 }}
-                className={cn(
-                  "text-left relative rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-950/70 to-zinc-900/50 p-5 flex flex-col gap-3 group outline-none focus:ring-2 focus:ring-yellow-400/60 transition",
-                  selected?.id === ev.id &&
-                    !selectionMode &&
-                    "ring-2 ring-yellow-400/60",
-                  selectionMode &&
-                    ev.selecting &&
-                    "ring-2 ring-emerald-500/60 border-emerald-600"
-                )}
-              >
-                {selectionMode && (
-                  <div className="absolute top-2 left-2 z-10">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleSelect(ev.id);
-                      }}
-                      className={cn(
-                        "h-5 w-5 rounded border flex items-center justify-center text-[10px] font-medium",
-                        ev.selecting
-                          ? "bg-emerald-500 border-emerald-500 text-black"
-                          : "bg-zinc-900/70 border-zinc-600 text-zinc-400 hover:border-zinc-400"
-                      )}
-                      aria-pressed={!!ev.selecting}
-                    >
-                      {ev.selecting ? "✓" : ""}
-                    </button>
-                  </div>
-                )}
-                <div className="flex items-start gap-3">
-                  <div className="flex-1 space-y-1">
-                    <h3 className="font-semibold text-zinc-100 text-sm line-clamp-2">
-                      {ev.title}
-                    </h3>
-                    <p className="text-[11px] text-zinc-400 line-clamp-3">
-                      {ev.short_description}
-                    </p>
-                  </div>
-                  <EventStatusBadge status={ev.status} />
-                </div>
-                <div className="text-[10px] text-zinc-500 space-y-1">
-                  {ev.start_datetime && (
-                    <p>Start: {new Date(ev.start_datetime).toLocaleString()}</p>
-                  )}
-                  {ev.end_datetime && (
-                    <p>End: {new Date(ev.end_datetime).toLocaleString()}</p>
-                  )}
-                </div>
-                <div className="flex flex-wrap gap-1 min-h-[20px]">
-                  {ev.tags.slice(0, 5).map((t) => (
-                    <span
-                      key={t}
-                      className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 text-[10px]"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                  {ev.tags.length > 5 && (
-                    <span className="text-[10px] text-zinc-500">
-                      +{ev.tags.length - 5}
-                    </span>
-                  )}
-                </div>
-                <div className="flex items-center justify-between pt-1">
-                  {view === "pending" && (
-                    <span className="text-[10px] text-zinc-500">
-                      Click to review ▸
-                    </span>
-                  )}
-                  {view === "approved" && ev.review_notes && (
-                    <p className="text-[10px] text-emerald-400 line-clamp-1 flex-1 text-right">
-                      Latest: {ev.review_notes.split("\n").slice(-1)[0]}
-                    </p>
-                  )}
-                </div>
-              </motion.button>
-            );
-          })}
-        </AnimatePresence>
+                viewLabel={view === "pending" ? "Review" : "View"}
+              />
+              {view === "approved" && ev.review_notes && (
+                <p className="mt-1 text-[10px] text-emerald-400 line-clamp-1">
+                  Latest: {ev.review_notes.split("\n").slice(-1)[0]}
+                </p>
+              )}
+            </div>
+          );
+        })}
       </div>
 
-      {/* Detail Modal */}
-      <AnimatePresence>
-        {selected && (
-          <motion.div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="absolute inset-0 bg-black/75 backdrop-blur-sm"
-              onClick={() => !actionLoading && setSelected(null)}
-            />
-            <motion.div
-              initial={{ opacity: 0, y: 40, scale: 0.96 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 170, damping: 22 }}
-              role="dialog"
-              aria-modal="true"
-              className="relative z-10 w-full max-w-5xl max-h-[92vh] overflow-hidden rounded-2xl border border-zinc-700/70 bg-gradient-to-br from-zinc-950/90 via-zinc-900/80 to-zinc-950/80 backdrop-blur-xl shadow-[0_0_0_1px_rgba(255,255,255,0.05),0_12px_55px_-10px_rgba(0,0,0,0.65)] flex flex-col"
-            >
-              <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800/70 bg-zinc-900/60">
-                <div className="space-y-1">
-                  <h2 className="text-lg font-semibold text-zinc-100">
-                    {selected.title}
-                  </h2>
-                  <p className="text-[11px] text-zinc-400">{selected.slug}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <EventStatusBadge status={selected.status} />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setSelected(null)}
-                    disabled={actionLoading}
-                  >
-                    Close
-                  </Button>
-                </div>
-              </div>
-              <div className="flex-1 grid md:grid-cols-[1fr_300px] gap-0 overflow-hidden">
-                <div className="relative overflow-y-auto p-6 space-y-6 custom-scroll">
-                  <section className="space-y-3">
-                    <h3 className="text-sm font-medium tracking-wide text-zinc-300 uppercase">
-                      Overview
-                    </h3>
-                    <div className="text-xs text-zinc-400 leading-relaxed">
-                      {selected.short_description}
-                    </div>
-                    {selected.description && (
-                      <div className="rounded-xl border border-zinc-800/70 bg-zinc-900/40 p-4">
-                        <h4 className="text-[11px] font-semibold text-zinc-300 mb-2">
-                          Full Description
-                        </h4>
-                        <pre className="whitespace-pre-wrap text-[12px] text-zinc-300 font-sans">
-                          {selected.description}
-                        </pre>
-                      </div>
-                    )}
-                  </section>
-                  <section className="grid grid-cols-2 gap-4 text-[11px]">
-                    <div className="rounded-lg border border-zinc-800/70 bg-zinc-900/30 p-3 space-y-1">
-                      <p className="text-zinc-500">Start</p>
-                      <p className="text-zinc-200 font-medium">
-                        {selected.start_datetime
-                          ? new Date(selected.start_datetime).toLocaleString()
-                          : "—"}
-                      </p>
-                    </div>
-                    <div className="rounded-lg border border-zinc-800/70 bg-zinc-900/30 p-3 space-y-1">
-                      <p className="text-zinc-500">End</p>
-                      <p className="text-zinc-200 font-medium">
-                        {selected.end_datetime
-                          ? new Date(selected.end_datetime).toLocaleString()
-                          : "—"}
-                      </p>
-                    </div>
-                    <div className="rounded-lg border border-zinc-800/70 bg-zinc-900/30 p-3 space-y-1 col-span-2">
-                      <p className="text-zinc-500">Location</p>
-                      <p className="text-zinc-200 font-medium">
-                        {selected.location || "—"}
-                      </p>
-                    </div>
-                    <div className="rounded-lg border border-zinc-800/70 bg-zinc-900/30 p-3 space-y-1 col-span-2">
-                      <p className="text-zinc-500">Event URL</p>
-                      {selected.event_url ? (
-                        <a
-                          href={selected.event_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-yellow-300 hover:underline break-all text-[11px]"
-                        >
-                          {selected.event_url}
-                        </a>
-                      ) : (
-                        <span className="text-zinc-200">—</span>
-                      )}
-                    </div>
-                  </section>
-                  <section className="space-y-3">
-                    <h3 className="text-sm font-medium tracking-wide text-zinc-300 uppercase">
-                      Tags
-                    </h3>
-                    <div className="flex flex-wrap gap-2">
-                      {selected.tags.map((t) => (
-                        <span
-                          key={t}
-                          className="px-2 py-1 rounded-full bg-amber-500/10 text-amber-300 text-[11px] border border-amber-400/20"
-                        >
-                          {t}
-                        </span>
-                      ))}
-                      {selected.tags.length === 0 && (
-                        <span className="text-[11px] text-zinc-500">
-                          No tags
-                        </span>
-                      )}
-                    </div>
-                  </section>
-                  <section className="space-y-3">
-                    <h3 className="text-sm font-medium tracking-wide text-zinc-300 uppercase">
-                      Submission
-                    </h3>
-                    <ul className="text-[11px] text-zinc-400 space-y-1">
-                      <li>
-                        <span className="text-zinc-500">Posted By:</span>{" "}
-                        <span className="text-zinc-300">
-                          {selected.posted_by_email || selected.posted_by_id}
-                        </span>
-                      </li>
-                      <li>
-                        <span className="text-zinc-500">Created:</span>{" "}
-                        {new Date(selected.created_at).toLocaleString()}
-                      </li>
-                      <li>
-                        <span className="text-zinc-500">Updated:</span>{" "}
-                        {new Date(selected.updated_at).toLocaleString()}
-                      </li>
-                      {/* type field not present on ExternalEvent type in frontend; backend includes maybe; display status instead */}
-                      <li>
-                        <span className="text-zinc-500">Status:</span>{" "}
-                        {selected.status}
-                      </li>
-                    </ul>
-                  </section>
-                </div>
-                <div className="relative border-t md:border-t-0 md:border-l border-zinc-800/70 bg-zinc-900/40 flex flex-col">
-                  <div className="sticky top-0 z-10 px-5 py-4 border-b border-zinc-800/70 bg-zinc-950/70 backdrop-blur-sm">
-                    <p className="text-[11px] font-medium tracking-wide text-zinc-400 uppercase">
-                      Moderation
-                    </p>
-                  </div>
-                  <div className="flex-1 overflow-y-auto p-5 space-y-6 custom-scroll">
-                    <div className="space-y-2">
-                      <label className="text-xs font-medium text-zinc-300">
-                        Decision Notes (optional)
-                      </label>
-                      <Textarea
-                        value={notes}
-                        onChange={(e) => setNotes(e.target.value)}
-                        rows={6}
-                        placeholder="Add context for the submitter..."
-                        className="resize-none text-xs"
-                      />
-                      <p className="text-[10px] text-zinc-500">
-                        Visible to submitter. Short, clear, constructive
-                        feedback.
-                      </p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <Button
-                        onClick={() =>
-                          moderate(selected.id, "approve", notes || undefined)
-                        }
-                        disabled={actionLoading}
-                        variant="success"
-                        className="h-9 text-xs"
-                      >
-                        {submittingIds.has(selected.id) && actionLoading
-                          ? "Approving..."
-                          : "Approve (A)"}
-                      </Button>
-                      <Button
-                        onClick={() =>
-                          moderate(selected.id, "reject", notes || undefined)
-                        }
-                        disabled={actionLoading}
-                        variant="danger"
-                        className="h-9 text-xs"
-                      >
-                        {submittingIds.has(selected.id) && actionLoading
-                          ? "Rejecting..."
-                          : "Reject (R)"}
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setSelected(null);
-                          setNotes("");
-                        }}
-                        variant="outline"
-                        className="col-span-2 h-8 text-[11px]"
-                        disabled={actionLoading}
-                      >
-                        Cancel / Close (Esc)
-                      </Button>
-                    </div>
-                    {selected.review_notes && (
-                      <div className="space-y-2">
-                        <p className="text-[11px] font-medium text-zinc-300">
-                          Previous Notes
-                        </p>
-                        <div className="space-y-2 max-h-40 overflow-y-auto pr-1 custom-scroll">
-                          {selected.review_notes
-                            .split("\n")
-                            .filter(Boolean)
-                            .map((n, i) => (
-                              <div
-                                key={i}
-                                className="rounded-md border border-zinc-800/70 bg-zinc-900/60 p-2 text-[11px] text-zinc-400"
-                              >
-                                {n}
-                              </div>
-                            ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="px-5 py-3 border-t border-zinc-800/70 flex items-center justify-between text-[10px] text-zinc-500">
-                    <span>Shortcuts: A approve, R reject, Esc close</span>
-                    {actionLoading && (
-                      <span className="text-amber-400 animate-pulse">
-                        Processing...
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <EventDetailsDialog
+        event={selected}
+        onClose={() => {
+          setSelected(null);
+          setNotes("");
+        }}
+        showModeration={view === "pending"}
+        onApprove={(n) => {
+          if (selected) {
+            void moderate(selected.id, "approve", n);
+          }
+        }}
+        onReject={(n) => {
+          if (selected) {
+            void moderate(selected.id, "reject", n);
+          }
+        }}
+        moderationNotes={notes}
+        onChangeModerationNotes={setNotes}
+      />
     </div>
   );
 }

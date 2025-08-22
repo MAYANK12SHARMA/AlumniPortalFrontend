@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
 import { LogOut, UserRound } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, normalizeMediaUrl } from "@/lib/utils";
 
 export default function UserMenu() {
   const { user, logout } = useAuth();
@@ -26,11 +26,12 @@ export default function UserMenu() {
     (user as any)?.email ||
     "User";
   const email = (user as any)?.email || "";
-  const avatarUrl =
+  const avatarUrl = normalizeMediaUrl(
     (user as any)?.avatar_url ||
-    (user as any)?.avatar ||
-    (user as any)?.profile_picture ||
-    "";
+      (user as any)?.avatar ||
+      (user as any)?.profile_picture ||
+      ""
+  );
   const initial = String(displayName).trim().charAt(0).toUpperCase();
 
   return (

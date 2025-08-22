@@ -37,6 +37,42 @@ export async function listExternalEvents(
   return res.data as any;
 }
 
+// Bucketed date-status event lists (upcoming / ongoing / expired)
+// These map to dedicated backend endpoints that already apply time-based filtering.
+export async function listBucketedEvents(
+  bucket: "upcoming" | "ongoing" | "expired",
+  params: {
+    page?: number;
+    page_size?: number;
+    status?: string;
+    is_public?: boolean;
+    is_featured?: boolean;
+    ordering?: string;
+  } = {}
+): Promise<PaginatedEvents & { bucket: string }> {
+  const query: any = {};
+  if (params.page) query.page = params.page;
+  if (params.page_size) query.page_size = params.page_size;
+  if (params.status) query.status = params.status;
+  if (typeof params.is_public === "boolean")
+    query.is_public = params.is_public ? "1" : "0";
+  if (typeof params.is_featured === "boolean")
+    query.is_featured = params.is_featured ? "1" : "0";
+  if (params.ordering) query.ordering = params.ordering;
+  const res = await apiClient.get<PaginatedEvents & { bucket: string }>(
+    `/external-events/${bucket}/`,
+    query
+  );
+  return res.data as any;
+}
+
+export const listOngoingEvents = (p?: Parameters<typeof listBucketedEvents>[1]) =>
+  listBucketedEvents("ongoing", p);
+export const listExpiredEvents = (p?: Parameters<typeof listBucketedEvents>[1]) =>
+  listBucketedEvents("expired", p);
+export const listUpcomingEvents = (p?: Parameters<typeof listBucketedEvents>[1]) =>
+  listBucketedEvents("upcoming", p);
+
 export async function createExternalEvent(
   data: CreateExternalEventInput
 ): Promise<ExternalEvent> {

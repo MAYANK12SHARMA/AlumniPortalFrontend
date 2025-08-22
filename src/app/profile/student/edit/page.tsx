@@ -1,75 +1,71 @@
 "use client";
-
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { toast } from "react-hot-toast";
+import React, { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { StudentProfileWizard } from "@/components/profile/student/StudentProfileWizard";
 import { studentProfileApi } from "@/lib/api/profile";
 import { StudentProfile } from "@/types";
-import { Card } from "@/components/ui/card";
 
-export default function StudentProfileEditPage() {
-  const router = useRouter();
-  const [profileData, setProfileData] = useState<StudentProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+function EditStudentProfilePageInner() {
+  const qp = useSearchParams();
+  const step = qp.get("step") || undefined;
+  const [initial, setInitial] = useState<Partial<StudentProfile> | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    let mounted = true;
+    (async () => {
       try {
-        const profile = await studentProfileApi.get();
-        setProfileData(profile);
-      } catch (error: any) {
-        console.error("Error fetching profile:", error);
-        if (error.response?.status === 404) {
-          // No profile exists, redirect to create
-          router.push("/profile/student/create");
-        } else {
-          setError("Failed to load profile");
-          toast.error("Failed to load profile");
-        }
+        const data = await studentProfileApi.get();
+        if (mounted) setInitial(data as any);
+      } catch (e: any) {
+        if (mounted)
+          setError(e?.response?.data?.error || "Failed to load profile");
       } finally {
-        setIsLoading(false);
+        if (mounted) setLoading(false);
       }
+    })();
+    return () => {
+      mounted = false;
     };
+  }, []);
 
-    fetchProfile();
-  }, [router]);
-
-  if (isLoading) {
+  if (loading)
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <Card className="p-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          </div>
-        </Card>
+      <div className="flex items-center justify-center py-32 text-sm text-zinc-400">
+        Loading profile...
       </div>
     );
-  }
-
-  if (error) {
+  if (error)
     return (
-      <div className="max-w-4xl mx-auto p-6">
-        <Card className="p-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Error</h1>
-            <p className="text-gray-600 mb-4">{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              Try Again
-            </button>
-          </div>
-        </Card>
+      <div className="max-w-md mx-auto rounded-lg border border-red-900/40 bg-red-900/10 p-6 text-sm text-red-300 text-center">
+        {error}
       </div>
     );
-  }
+  return (
+    <StudentProfileWizard
+      initialData={initial || undefined}
+      isEditing
+      initialStepId={step}
+    />
+  );
+}
 
-  if (!profileData) {
-    return null;
-  }
-
-  return <StudentProfileWizard initialData={profileData} isEditing={true} />;
+export default function EditStudentProfilePage() {
+  return (
+    <ProtectedRoute requireAuth allowedRoles={["student"]}>
+      <div className="min-h-screen py-10 px-4 md:px-8">
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center py-32 text-sm text-zinc-400">
+              Loading...
+            </div>
+          }
+        >
+          <EditStudentProfilePageInner />
+        </Suspense>
+      </div>
+    </ProtectedRoute>
+  );
 }

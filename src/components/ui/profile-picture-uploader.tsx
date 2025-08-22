@@ -4,7 +4,7 @@ import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { Upload, X, User } from "lucide-react";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
+import { cn, normalizeMediaUrl } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { uploadApi } from "@/lib/api/profile";
 import { toast } from "react-hot-toast";
@@ -28,14 +28,7 @@ export function ProfilePictureUploader({
 
   // Ensure initial image URL is properly formatted
   const formatImageUrl = (url: string | null | undefined): string | null => {
-    if (!url) return null;
-
-    // If the URL is relative, make it absolute
-    if (url.startsWith("/media/")) {
-      return `http://127.0.0.1:8000${url}`;
-    }
-
-    return url;
+    return normalizeMediaUrl(url || undefined) || null;
   };
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(
@@ -80,12 +73,7 @@ export function ProfilePictureUploader({
 
         if (response.success && response.url) {
           // Ensure the URL is properly formatted
-          let imageUrl = response.url;
-
-          // If the URL is relative, make it absolute
-          if (imageUrl.startsWith("/media/")) {
-            imageUrl = `http://127.0.0.1:8000${imageUrl}`;
-          }
+          const imageUrl = normalizeMediaUrl(response.url) || response.url;
 
           onImageUploaded?.(imageUrl);
           setPreviewUrl(imageUrl);
@@ -230,10 +218,10 @@ export function ProfilePictureUploader({
 
       {/* Instructions */}
       <div className="text-center text-xs text-zinc-500 max-w-xs">
-        <p>
+        {/* <p>
           Upload a professional photo that represents you well. This will be
           visible to other users in the alumni network.
-        </p>
+        </p> */}
       </div>
     </div>
   );

@@ -209,18 +209,48 @@ export const NAV_ITEMS: NavNode[] = [
   },
   // Future placeholders (space reserved)
   {
-    label: "Events (coming soon)",
+    label: "Events",
     icon: React.createElement(CalendarDays, { size: 16 }),
     roles: ["admin", "alumni", "student"],
     children: [
       {
-        label: "Campus Events",
-        path: "#",
+        label: "Upcoming Events",
+        path: "/dashboard/events/upcoming",
         roles: ["admin", "alumni", "student"],
-        requiresApi: true,
+      },
+      {
+        label: "Ongoing Events",
+        path: "/dashboard/events/ongoing",
+        roles: ["admin", "alumni", "student"],
+      },
+      {
+        label: "Expired Events",
+        path: "/dashboard/events/expired",
+        roles: ["admin", "alumni", "student"],
       },
     ],
-    placeholder: true,
+  },
+  {
+    label: "Event Requests",
+    icon: React.createElement(FolderKanban, { size: 16 }),
+    roles: ["admin", "alumni", "student"],
+    children: [
+      {
+        label: "Create Event",
+        path: "/dashboard/events/create",
+        roles: ["admin", "alumni", "student"],
+      },
+      {
+        label: "My Events",
+        path: "/dashboard/events/mine",
+        roles: ["admin", "alumni", "student"],
+      },
+      {
+        label: "Pending Events",
+        path: "/dashboard/events/review",
+        roles: ["admin"],
+      },
+    ],
   },
   {
     label: "Resources (coming soon)",

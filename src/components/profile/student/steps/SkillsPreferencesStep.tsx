@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useFormContext } from "react-hook-form";
+import { motion } from "framer-motion";
 import { SkillsInput } from "@/components/ui/skills-input";
 import { JOB_TYPE_CHOICES } from "@/types";
 
@@ -147,15 +148,23 @@ export function SkillsPreferencesStep() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold text-zinc-100 mb-4">
-          Skills & Career Preferences
-        </h2>
-        <p className="text-zinc-400 mb-6">
-          Help us understand your skills and career aspirations to connect you
-          with relevant opportunities.
-        </p>
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      className="space-y-8"
+    >
+      <div className="relative overflow-hidden rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-950 via-black to-zinc-950 p-6">
+        <div className="absolute -top-16 -right-24 h-44 w-44 rounded-full bg-yellow-500/10 blur-3xl" />
+        <div className="absolute -bottom-20 -left-24 h-44 w-44 rounded-full bg-orange-500/10 blur-3xl" />
+        <div className="relative">
+          <h2 className="text-xl md:text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-amber-300 to-orange-400 mb-2">
+            Skills & Career Preferences
+          </h2>
+          <p className="text-sm text-zinc-400">
+            Help us understand your skills and aspirations for better matches.
+          </p>
+        </div>
       </div>
 
       {/* Technical Skills */}
@@ -189,52 +198,39 @@ export function SkillsPreferencesStep() {
       />
 
       {/* Career Goals */}
-      <div>
-        <label
-          htmlFor="career_goals"
-          className="block text-sm font-medium text-zinc-300 mb-2"
-        >
+      <div className="space-y-2">
+        <label htmlFor="career_goals" className="text-xs uppercase tracking-wide text-zinc-400 font-medium">
           Career Goals
         </label>
         <textarea
           id="career_goals"
           {...register("career_goals")}
-          rows={3}
+          rows={4}
           placeholder="Describe your short-term and long-term career goals..."
-          className={`w-full px-3 py-2 rounded-md shadow-sm border bg-zinc-950/60 border-zinc-800 text-zinc-100 placeholder-zinc-500 outline-none focus-visible:ring-2 focus-visible:ring-yellow-400/40 ${
-            errors.career_goals ? "border-rose-500/60" : ""
-          }`}
+          className={`w-full rounded-md bg-zinc-950/60 border border-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400/40 resize-none ${errors.career_goals ? "border-rose-500/60" : ""}`}
         />
-        {errors.career_goals && (
-          <p className="text-rose-400 text-sm mt-1">
-            {errors.career_goals.message as string}
-          </p>
-        )}
-        <p className="text-zinc-500 text-sm mt-1">Maximum 300 characters</p>
+        {errors.career_goals && (<p className="text-rose-400 text-xs">{errors.career_goals.message as string}</p>)}
+        <p className="text-[10px] tracking-wide text-zinc-500">Maximum 300 characters</p>
       </div>
 
       {/* Preferred Job Types */}
-      <div>
-        <label className="block text-sm font-medium text-zinc-300 mb-3">
-          Preferred Job Types
-        </label>
+      <div className="space-y-2">
+        <label className="text-xs uppercase tracking-wide text-zinc-400 font-medium">Preferred Job Types</label>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {JOB_TYPE_CHOICES.map((jobType) => (
-            <label
-              key={jobType.value}
-              className="flex items-center gap-2 rounded-md border border-zinc-800 bg-zinc-950/40 px-3 py-2 hover:bg-zinc-900/50 transition-colors"
-            >
-              <input
-                type="checkbox"
-                checked={preferredJobTypes.includes(jobType.value)}
-                onChange={(e) =>
-                  handleJobTypeChange(jobType.value, e.target.checked)
-                }
-                className="h-4 w-4 accent-yellow-400 rounded"
-              />
-              <span className="text-sm text-zinc-200">{jobType.label}</span>
-            </label>
-          ))}
+          {JOB_TYPE_CHOICES.map(jobType => {
+            const active = preferredJobTypes.includes(jobType.value);
+            return (
+              <button
+                key={jobType.value}
+                type="button"
+                onClick={() => handleJobTypeChange(jobType.value, !active)}
+                className={`group relative rounded-md border px-3 py-2 text-xs font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400/40 ${active ? "border-yellow-400/60 bg-yellow-400/10 text-yellow-200" : "border-zinc-800 bg-zinc-950/40 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60"}`}
+              >
+                <span className="relative z-10">{jobType.label}</span>
+                {active && <span className="absolute inset-0 rounded-md bg-gradient-to-br from-yellow-400/10 to-amber-500/10" />}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -258,29 +254,20 @@ export function SkillsPreferencesStep() {
       />
 
       {/* Extracurricular Activities */}
-      <div>
-        <label
-          htmlFor="extracurricular_activities"
-          className="block text-sm font-medium text-zinc-300 mb-2"
-        >
+      <div className="space-y-2">
+        <label htmlFor="extracurricular_activities" className="text-xs uppercase tracking-wide text-zinc-400 font-medium">
           Extracurricular Activities
         </label>
         <textarea
           id="extracurricular_activities"
           {...register("extracurricular_activities")}
-          rows={3}
+          rows={4}
           placeholder="Clubs, societies, volunteer work, sports, etc."
-          className={`w-full px-3 py-2 rounded-md shadow-sm border bg-zinc-950/60 border-zinc-800 text-zinc-100 placeholder-zinc-500 outline-none focus-visible:ring-2 focus-visible:ring-yellow-400/40 ${
-            errors.extracurricular_activities ? "border-rose-500/60" : ""
-          }`}
+          className={`w-full rounded-md bg-zinc-950/60 border border-zinc-800 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400/40 resize-none ${errors.extracurricular_activities ? "border-rose-500/60" : ""}`}
         />
-        {errors.extracurricular_activities && (
-          <p className="text-rose-400 text-sm mt-1">
-            {errors.extracurricular_activities.message as string}
-          </p>
-        )}
-        <p className="text-zinc-500 text-sm mt-1">Maximum 300 characters</p>
+        {errors.extracurricular_activities && (<p className="text-rose-400 text-xs">{errors.extracurricular_activities.message as string}</p>)}
+        <p className="text-[10px] tracking-wide text-zinc-500">Maximum 300 characters</p>
       </div>
-    </div>
+    </motion.div>
   );
 }

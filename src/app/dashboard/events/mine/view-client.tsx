@@ -2,9 +2,10 @@
 import React, { useEffect, useState } from "react";
 import { listExternalEvents } from "@/lib/api/events";
 import { ExternalEvent } from "@/types";
-import { EventStatusBadge } from "@/components/events/EventStatusBadge";
+import { EventStatusBadge } from "@/components/events/EventStatusBadge"; // kept for modal
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { EventCard } from "@/components/events/EventCard";
 
 export function MyEventsClient() {
   const [events, setEvents] = useState<ExternalEvent[]>([]);
@@ -44,10 +45,10 @@ export function MyEventsClient() {
     <div className="max-w-6xl mx-auto px-4 py-10 space-y-8">
       <header className="space-y-3">
         <h1 className="text-2xl font-semibold tracking-tight text-zinc-100">
-          My Submissions
+          My Events
         </h1>
         <p className="text-sm text-zinc-400">
-          Track approval status of events you submitted.
+          Track status of your event submissions (pending, approved, rejected).
         </p>
       </header>
       <div className="flex flex-wrap gap-2">
@@ -84,61 +85,23 @@ export function MyEventsClient() {
             </motion.div>
           )}
           {!loading &&
-            events.map((ev) => {
-              const rejectedNote = ev.review_notes && ev.status === "rejected";
-              return (
-                <motion.button
-                  key={ev.id}
-                  type="button"
-                  onClick={() => setSelected(ev)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      setSelected(ev);
-                    }
-                  }}
-                  layout
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="group text-left relative rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-950/70 to-zinc-900/50 p-5 flex flex-col gap-3 outline-none focus:ring-2 focus:ring-yellow-400/60 transition"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="flex-1 space-y-1">
-                      <h3 className="font-semibold text-zinc-100 text-sm line-clamp-2">
-                        {ev.title}
-                      </h3>
-                      <p className="text-[11px] text-zinc-400 line-clamp-3">
-                        {ev.short_description}
-                      </p>
-                    </div>
-                    <EventStatusBadge status={ev.status} />
-                  </div>
-                  <div className="flex flex-wrap gap-1 min-h-[20px]">
-                    {ev.tags.slice(0, 4).map((t) => (
-                      <span
-                        key={t}
-                        className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 text-[10px]"
-                      >
-                        {t}
-                      </span>
-                    ))}
-                    {ev.tags.length > 4 && (
-                      <span className="text-[10px] text-zinc-500">
-                        +{ev.tags.length - 4}
-                      </span>
-                    )}
-                  </div>
-                  <div className="mt-auto flex justify-between items-center text-[10px] text-zinc-500 pt-2 border-t border-zinc-800">
-                    <span>{new Date(ev.created_at).toLocaleDateString()}</span>
-                    {rejectedNote && <ReviewNotes notes={ev.review_notes!} />}
-                  </div>
-                  <span className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition text-[10px] text-center text-zinc-500 py-1">
-                    View details ▸
-                  </span>
-                </motion.button>
-              );
-            })}
+            events.map((ev) => (
+              <motion.button
+                key={ev.id}
+                type="button"
+                onClick={() => setSelected(ev)}
+                layout
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                className="text-left relative outline-none focus-visible:ring-2 focus-visible:ring-yellow-400/70 rounded-lg"
+              >
+                <EventCard event={ev} compact className="pr-5" />
+                <span className="pointer-events-none absolute inset-x-2 bottom-1 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition text-[10px] text-center text-zinc-500">
+                  View details ▸
+                </span>
+              </motion.button>
+            ))}
         </AnimatePresence>
       </div>
 
@@ -321,11 +284,11 @@ export function MyEventsClient() {
   );
 }
 
-function ReviewNotes({ notes }: { notes: string }) {
-  const lastLine = notes.trim().split(/\n/).filter(Boolean).slice(-1)[0];
-  return (
-    <span className="text-rose-300/80" title={notes}>
-      {lastLine}
-    </span>
-  );
-}
+// function ReviewNotes({ notes }: { notes: string }) {
+//   const lastLine = notes.trim().split(/\n/).filter(Boolean).slice(-1)[0];
+//   return (
+//     <span className="text-rose-300/80" title={notes}>
+//       {lastLine}
+//     </span>
+//   );
+// }

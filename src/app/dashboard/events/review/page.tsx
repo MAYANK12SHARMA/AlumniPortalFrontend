@@ -6,7 +6,7 @@ export const metadata = { title: "Review Events" };
 
 export default function ReviewEventsPage() {
   return (
-    <ProtectedRoute allowedRoles={["admin"]}>
+    <ProtectedRoute allowedRoles={["admin","alumni","student"]}>
       <ReviewEventsClient />
     </ProtectedRoute>
   );
