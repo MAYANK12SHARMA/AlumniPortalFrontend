@@ -300,7 +300,7 @@ class ApiClient {
   async getAlumniDirectory(
     filters: DirectoryFilters
   ): Promise<ApiResponse<any[]>> {
-    const response = await this.client.get("/directory/alumni/", {
+    const response = await this.client.get("/dashboard/directory/alumni/", {
       params: filters,
     });
     return response;
@@ -309,10 +309,21 @@ class ApiClient {
   async getStudentDirectory(
     filters: DirectoryFilters
   ): Promise<ApiResponse<any[]>> {
-    const response = await this.client.get("/directory/students/", {
-      params: filters,
-    });
-    return response;
+    // Primary plural endpoint (students)
+    try {
+      const response = await this.client.get("/dashboard/directory/student/", {
+        params: filters,
+      });
+      return response;
+    } catch (err: any) {
+      // Fallback to singular path if backend only exposes that
+      if (err?.response?.status === 404) {
+        return this.client.get("/dashboard/directory/student/", {
+          params: filters,
+        });
+      }
+      throw err;
+    }
   }
 
   async getDirectoryStats(): Promise<ApiResponse<any>> {

@@ -1,13 +1,14 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { navForRole, Role, NavNode } from "@/config/nav";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, LogOut, Shield } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import MissingApiNote from "./MissingApiNote";
+import { motion, AnimatePresence } from "framer-motion";
 
 type Props = {
   role: Role;
@@ -19,9 +20,12 @@ export default function RoleSidebar({ role, onNavigate, className }: Props) {
   const pathname = usePathname();
   const { logout } = useAuth();
   const items = useMemo<NavNode[]>(() => navForRole(role), [role]);
-  const [open, setOpen] = useState<Record<string, boolean>>({});
+  // single-open accordion key
+  const [openKey, setOpenKey] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const toggle = (key: string) => setOpen((o) => ({ ...o, [key]: !o[key] }));
+  const toggle = (key: string) =>
+    setOpenKey((current) => (current === key ? null : key));
 
   const activeMatch = useCallback(
     (path: string) => path !== "#" && pathname.startsWith(path),
@@ -30,36 +34,50 @@ export default function RoleSidebar({ role, onNavigate, className }: Props) {
 
   // Auto-open any section that contains the active route
   useEffect(() => {
-    const nextOpen: Record<string, boolean> = {};
+    // auto-open section containing active path
+    let found: string | null = null;
     navForRole(role).forEach((node: NavNode) => {
-      if (!node.children) return;
+      if (found || !node.children) return;
       const leaves = (node.children || []).filter((c: any) =>
         c.roles?.includes(role)
       );
-      const anyActive = leaves.some((c: any) => activeMatch(c.path));
-      if (anyActive) nextOpen[node.label] = true;
+      if (leaves.some((c: any) => activeMatch(c.path))) {
+        found = node.label;
+      }
     });
-    setOpen((o) => ({ ...o, ...nextOpen }));
+    setOpenKey((prev) => (found ? found : prev));
   }, [pathname, role, activeMatch]);
 
   return (
     <aside
+      ref={containerRef}
       className={cn(
-        "h-full w-72 border-r border-zinc-900/90 bg-black/60 backdrop-blur-md p-4 text-zinc-100",
+        "group/sidebar relative h-full w-72 border-r border-zinc-800/80 bg-gradient-to-b from-zinc-950/80 via-zinc-950/40 to-black/70 backdrop-blur-xl p-4 text-zinc-100 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]",
+        "[mask-image:linear-gradient(to_bottom,rgba(0,0,0,1),rgba(0,0,0,.85)_60%,rgba(0,0,0,.4))]",
         className
       )}
     >
-      <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-2 font-semibold">
-          <Shield size={18} className="text-yellow-400" />
-          <span>Alumni Portal</span>
+      {/* Glow accent */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-yellow-400/15 to-transparent opacity-60" />
+      <div className="relative mb-5 flex items-center justify-between">
+        <div className="flex items-center gap-2 font-semibold tracking-wide">
+          <div className="relative">
+            <div className="absolute inset-0 animate-pulse rounded-full bg-yellow-400/20 blur" />
+            <Shield
+              size={20}
+              className="relative text-yellow-400 drop-shadow"
+            />
+          </div>
+          <span className="bg-gradient-to-r from-yellow-300 to-yellow-500 bg-clip-text text-transparent">
+            Alumni Portal
+          </span>
         </div>
       </div>
 
-      <nav className="space-y-2">
+      <nav className="relative space-y-1">
         {items.map((node) => {
           const key = node.label;
-          const isOpen = open[key];
+          const isOpen = openKey === key;
 
           // Single link node via pathByRole
           if (node.pathByRole) {
@@ -74,14 +92,24 @@ export default function RoleSidebar({ role, onNavigate, className }: Props) {
                     onNavigate?.();
                   }}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors border",
+                    "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm border relative overflow-hidden",
+                    "before:absolute before:inset-0 before:bg-gradient-to-r before:from-yellow-400/0 before:via-yellow-400/5 before:to-yellow-400/0 before:opacity-0 before:transition-opacity before:duration-500 hover:before:opacity-100",
                     activeMatch(target)
-                      ? "bg-yellow-400 text-black shadow border-yellow-500/50"
-                      : "text-zinc-300 hover:bg-zinc-900 hover:text-zinc-100 border-transparent"
+                      ? "bg-zinc-900/60 border-yellow-500/40 shadow-inner shadow-yellow-500/10 ring-1 ring-yellow-500/30"
+                      : "border-transparent hover:border-zinc-700/60 hover:bg-zinc-900/40"
                   )}
                 >
-                  <span className="text-yellow-400">{node.icon}</span>
-                  <span>{node.label}</span>
+                  <span
+                    className={cn(
+                      "text-yellow-400 transition-transform duration-300 group-hover:scale-110",
+                      activeMatch(target) && "scale-110"
+                    )}
+                  >
+                    {node.icon}
+                  </span>
+                  <span className="font-medium tracking-wide">
+                    {node.label}
+                  </span>
                 </Link>
                 {needsApi && <MissingApiNote className="mt-1" />}
               </div>
@@ -94,80 +122,123 @@ export default function RoleSidebar({ role, onNavigate, className }: Props) {
           );
           const anyActive = leaves.some((c: any) => activeMatch(c.path));
           return (
-            <div key={key}>
+            <div key={key} className="relative">
               <button
                 onClick={() => toggle(key)}
                 className={cn(
-                  "w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors border",
+                  "group w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm border relative overflow-hidden",
+                  "before:absolute before:inset-0 before:bg-gradient-to-r before:from-yellow-400/0 before:via-yellow-400/5 before:to-yellow-400/0 before:opacity-0 before:transition-opacity before:duration-500 hover:before:opacity-100",
                   anyActive
-                    ? "bg-yellow-400 text-black shadow border-yellow-500/50"
+                    ? "bg-gradient-to-r from-yellow-400/70 to-yellow-500/80 text-black font-medium border-yellow-400/70 shadow-[0_0_0_1px_rgba(255,255,255,0.2)]"
                     : isOpen
-                    ? "bg-zinc-900 text-zinc-100 border-zinc-800"
-                    : "text-zinc-300 hover:bg-zinc-900 hover:text-zinc-100 border-transparent"
+                    ? "bg-zinc-900/60 text-zinc-100 border-zinc-700/60"
+                    : "text-zinc-300 hover:text-zinc-100 border-transparent hover:border-zinc-700/60 hover:bg-zinc-900/40"
                 )}
               >
                 <span
-                  className={cn(anyActive ? "text-black" : "text-yellow-400")}
+                  className={cn(
+                    anyActive
+                      ? "text-black"
+                      : "text-yellow-400 group-hover:scale-110 transition-transform duration-300"
+                  )}
                 >
                   {node.icon}
                 </span>
-                <span className="flex-1 text-left">{node.label}</span>
+                <span className="flex-1 text-left font-medium tracking-wide">
+                  {node.label}
+                </span>
                 <ChevronDown
                   size={16}
                   className={cn(
-                    "transition-transform",
-                    (isOpen || anyActive) && "rotate-180"
+                    "transition-transform duration-300 text-zinc-500 group-hover:text-zinc-300",
+                    (isOpen || anyActive) && "rotate-180",
+                    anyActive && "text-black"
                   )}
                 />
+                {/* Active glow ring */}
+                {anyActive && (
+                  <span className="pointer-events-none absolute inset-0 rounded-lg ring-2 ring-yellow-300/60 ring-offset-0" />
+                )}
               </button>
-              {isOpen || anyActive ? (
-                <ul className="mt-1 ml-2 space-y-1">
-                  {leaves.map((leaf: any) => {
-                    const blocked = leaf.path === "#";
-                    return (
-                      <li key={leaf.label}>
-                        <Link
-                          href={blocked ? pathname : leaf.path}
-                          onClick={() => {
-                            if (blocked) return;
-                            // Ensure this parent stays open when navigating to a child
-                            setOpen((o) => ({ ...o, [key]: true }));
-                            onNavigate?.();
-                          }}
-                          className={cn(
-                            "flex items-center gap-2 rounded-md px-3 py-2 text-sm border",
-                            activeMatch(leaf.path)
-                              ? "bg-yellow-400/10 text-yellow-300 border-yellow-500/30"
-                              : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900 border-transparent"
-                          )}
+              <AnimatePresence initial={false}>
+                {(isOpen || anyActive) && (
+                  <motion.ul
+                    key="content"
+                    initial="collapsed"
+                    animate="open"
+                    exit="collapsed"
+                    variants={{
+                      open: { height: "auto", opacity: 1 },
+                      collapsed: { height: 0, opacity: 0 },
+                    }}
+                    transition={{ duration: 0.35, ease: [0.65, 0, 0.35, 1] }}
+                    className="relative ml-1 mt-1 space-y-1 overflow-hidden pl-2"
+                  >
+                    {leaves.map((leaf: any, idx: number) => {
+                      const blocked = leaf.path === "#";
+                      const selected = activeMatch(leaf.path);
+                      return (
+                        <motion.li
+                          key={leaf.label}
+                          initial={{ x: -8, opacity: 0 }}
+                          animate={{ x: 0, opacity: 1 }}
+                          transition={{ delay: 0.03 * idx }}
                         >
-                          <span className="h-1.5 w-1.5 rounded-full bg-yellow-400" />
-                          <span>{leaf.label}</span>
-                        </Link>
-                        {(leaf as any).requiresApi || leaf.path === "#" ? (
-                          <MissingApiNote className="ml-5 mt-1" />
-                        ) : null}
-                      </li>
-                    );
-                  })}
-                </ul>
-              ) : null}
+                          <Link
+                            href={blocked ? pathname : leaf.path}
+                            onClick={() => {
+                              if (blocked) return;
+                              onNavigate?.();
+                            }}
+                            className={cn(
+                              "group/leaf relative flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium tracking-wide border backdrop-blur-sm",
+                              "transition-colors duration-300",
+                              selected
+                                ? "bg-yellow-400/15 text-yellow-200 border-yellow-500/30 shadow-inner shadow-yellow-500/10"
+                                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60 border-transparent hover:border-zinc-700/60"
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                "flex h-4 w-4 items-center justify-center rounded-md",
+                                selected
+                                  ? "bg-yellow-400 text-black shadow"
+                                  : "bg-zinc-800/80 text-yellow-400 group-hover/leaf:bg-zinc-700"
+                              )}
+                            >
+                              {leaf.icon || (
+                                <span className="h-1.5 w-1.5 rounded-full bg-yellow-400" />
+                              )}
+                            </span>
+                            <span className="flex-1">{leaf.label}</span>
+                            {selected && (
+                              <span className="absolute inset-y-0 left-0 w-0.5 rounded-full bg-gradient-to-b from-yellow-300 to-yellow-500" />
+                            )}
+                          </Link>
+                          {(leaf as any).requiresApi || leaf.path === "#" ? (
+                            <MissingApiNote className="ml-6 mt-1" />
+                          ) : null}
+                        </motion.li>
+                      );
+                    })}
+                  </motion.ul>
+                )}
+              </AnimatePresence>
             </div>
           );
         })}
       </nav>
-
-      {/* Spacer for future sections */}
-      <div className="mt-6 rounded-lg border border-zinc-900 bg-zinc-950/60 p-3 text-xs text-zinc-400">
-        <div className="font-medium text-zinc-300">More coming soon</div>
-        <div>Space reserved for future sections.</div>
-      </div>
-
-      <div className="mt-4">
+      <div className="mt-8 space-y-3 pt-4">
+        <div className="rounded-lg border border-dashed border-zinc-800/70 bg-zinc-950/40 p-3 text-[10px] leading-relaxed text-zinc-500">
+          <div className="mb-0.5 font-medium text-zinc-300/90">
+            Platform roadmap
+          </div>
+          More features are being incubated. Stay tuned ✨
+        </div>
         <Button
           variant="outline"
           onClick={logout}
-          className="w-full flex items-center gap-2 text-zinc-300 hover:text-red-400 hover:border-red-400/50"
+          className="w-full flex items-center justify-center gap-2 border-zinc-700/60 bg-zinc-900/40 text-zinc-300 hover:text-red-400 hover:border-red-400/50 hover:bg-red-950/20 transition-colors"
         >
           <LogOut size={14} />
           Logout

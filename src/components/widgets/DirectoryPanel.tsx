@@ -18,7 +18,7 @@ export function DirectoryPanel({ kind }: { kind: "alumni" | "students" }) {
     async function load() {
       try {
         const endpoint =
-          kind === "alumni" ? "/directory/alumni/" : "/directory/students/";
+          kind === "alumni" ? "/directory/alumni/" : "/directory/student/";
         const res = await apiClient.get<any>(endpoint, {
           search,
           page_size: 5, // Reduced to show just a preview
@@ -41,7 +41,7 @@ export function DirectoryPanel({ kind }: { kind: "alumni" | "students" }) {
     return ["Name", "Program", "Year", "GPA"];
   }, [kind]);
 
-  const directoryPath = kind === "alumni" ? "/dashboard/admin/directory/alumni" : "/dashboard/admin/directory/students";
+  const directoryPath = kind === "alumni" ? "/dashboard/admin/directory/alumni" : "/dashboard/admin/directory/student";
 
   return (
     <Card id={kind === "alumni" ? "alumni-directory" : "student-directory"}>

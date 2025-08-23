@@ -55,7 +55,7 @@ export default function NotFound() {
               size="lg"
               className="w-full sm:w-auto"
             >
-              <Link href="/directory/alumni">Browse Directory</Link>
+              <Link href="/dashboard/directory/alumni">Browse Directory</Link>
             </Button>
           </div>
           <div className="pt-4 text-xs text-zinc-500">
