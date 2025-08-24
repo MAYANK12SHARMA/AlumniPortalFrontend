@@ -52,7 +52,8 @@ export interface CreateJobInput {
   end_date?: string | null; // date only
 }
 
-export interface UpdateJobInput extends Partial<CreateJobInput> {}
+// Using a type alias instead of an empty extending interface to satisfy eslint rule
+export type UpdateJobInput = Partial<CreateJobInput>;
 
 export interface JobFilters {
   page?: number;

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import RoleSidebar from "./RoleSidebar";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,15 @@ export default function DashboardLayout({
       <div className="flex">
         {/* Desktop sidebar */}
         <div className="hidden md:block sticky top-0 h-screen">
-          <RoleSidebar role={role} />
+          <Suspense
+            fallback={
+              <div className="w-72 h-screen border-r border-zinc-800/80 bg-zinc-950/40 p-4 text-xs text-zinc-500">
+                Loading navigation...
+              </div>
+            }
+          >
+            <RoleSidebar role={role} />
+          </Suspense>
         </div>
 
         {/* Mobile sidebar */}
@@ -36,11 +44,19 @@ export default function DashboardLayout({
               onClick={() => setMobileOpen(false)}
             />
             <div className="relative z-20 h-full w-80">
-              <RoleSidebar
-                role={role}
-                onNavigate={() => setMobileOpen(false)}
-                className="h-full"
-              />
+              <Suspense
+                fallback={
+                  <div className="w-80 h-full border-r border-zinc-800/80 bg-zinc-950/40 p-4 text-xs text-zinc-500">
+                    Loading navigation...
+                  </div>
+                }
+              >
+                <RoleSidebar
+                  role={role}
+                  onNavigate={() => setMobileOpen(false)}
+                  className="h-full"
+                />
+              </Suspense>
             </div>
           </div>
         )}
