@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 // Allow-list domains for proxying. You can extend via env var PROXY_ALLOWED_HOSTS (comma-separated)
-const defaultAllowed = new Set(["127.0.0.1", "localhost"]);
+const defaultAllowed = new Set(["127.0.0.1", "localhost","collegesathi.hopto.org"]);
 const envAllowed = (process.env.PROXY_ALLOWED_HOSTS || "")
   .split(",")
   .map((s) => s.trim())

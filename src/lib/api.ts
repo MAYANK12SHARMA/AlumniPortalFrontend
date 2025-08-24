@@ -8,7 +8,9 @@ import {
   DirectoryFilters,
 } from "../types";
 
-const BASE = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000/api/";
+const BASE =
+  // process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000/api/";
+  process.env.NEXT_PUBLIC_API_BASE || "http://collegesathi.hopto.org/api/";
 
 export async function getAdminDashboardStats() {
   const res = await apiClient.get("/admin/dashboard/");
@@ -54,7 +56,9 @@ class ApiClient {
 
   constructor() {
     this.client = axios.create({
-      baseURL: process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api",
+      baseURL:
+        process.env.NEXT_PUBLIC_API_URL || "http://collegesathi.hopto.org/api/",
+      // baseURL: process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/api",
       timeout: 30000, // Increased to 30 seconds for registration
       // headers: {
       //   "Content-Type": "application/json",

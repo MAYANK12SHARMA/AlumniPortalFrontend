@@ -37,6 +37,11 @@ export function cn(...inputs: ClassValue[]): string {
 // - Leaves other hosts untouched
 export function normalizeMediaUrl(url?: string | null): string | undefined {
   if (!url) return undefined;
-  if (url.startsWith("/media/")) return `http://127.0.0.1:8000${url}`;
-  return url.replace(/^http:\/\/localhost:8000/, "http://127.0.0.1:8000");
+  if (url.startsWith("/media/")) return `http://collegesathi.hopto.org${url}`;
+  // if (url.startsWith("/media/")) return `http://127.0.0.1:8000${url}`;
+  return url.replace(
+    /^http:\/\/localhost:8000/,
+    "http://collegesathi.hopto.org"
+  );
+  // return url.replace(/^http:\/\/localhost:8000/, "http://127.0.0.1:8000");
 }
