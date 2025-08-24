@@ -54,6 +54,11 @@ body::before {
   100% { transform: translateX(120%); opacity: 0; }
 }
 
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
 .animate-spin-slow { animation: spin-slow linear infinite; }
 .animate-ping-slow { animation: ping-slow 2.4s cubic-bezier(0,0,.2,1) infinite; }
 .animate-card-shimmer { animation: card-shimmer 2.2s ease-in-out infinite; mix-blend-mode: screen; }

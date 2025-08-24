@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { navForRole, Role, NavNode } from "@/config/nav";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -27,26 +28,73 @@ export default function RoleSidebar({ role, onNavigate, className }: Props) {
   const toggle = (key: string) =>
     setOpenKey((current) => (current === key ? null : key));
 
-  const activeMatch = useCallback(
-    (path: string) => path !== "#" && pathname.startsWith(path),
-    [pathname]
+  const searchParams = useSearchParams();
+
+  // Parse a nav leaf path (may contain ?query)
+  function parseNavPath(p: string) {
+    const [rawPath, query = ""] = p.split("?");
+    const params: Record<string, string> = {};
+    if (query) {
+      for (const part of query.split("&")) {
+        if (!part) continue;
+        const [k, v = ""] = part.split("=");
+        params[decodeURIComponent(k)] = decodeURIComponent(v);
+      }
+    }
+    return { path: rawPath.replace(/\/$/, ""), params };
+  }
+
+  const buildCurrentParamMap = useCallback(() => {
+    const map: Record<string, string> = {};
+    searchParams?.forEach((value, key) => {
+      map[key] = value;
+    });
+    return map;
+  }, [searchParams]);
+
+  const currentParamMap = buildCurrentParamMap();
+  const normalizedPathname = pathname.replace(/\/$/, "");
+
+  // Determine if a leaf is active considering query params.
+  const isLeafActive = useCallback(
+    (leafPath: string, siblingLeafs: string[]): boolean => {
+      if (!leafPath || leafPath === "#") return false;
+      const { path, params } = parseNavPath(leafPath);
+      if (path !== normalizedPathname) return false;
+      const paramKeys = Object.keys(params);
+      if (paramKeys.length > 0) {
+        // All params in leaf must match current (exact value)
+        return paramKeys.every((k) => currentParamMap[k] === params[k]);
+      }
+      // Leaf has no query params: only active if NO sibling with params is satisfied (to avoid duplicate highlighting)
+      const anySpecificSiblingActive = siblingLeafs.some((sib) => {
+        if (sib === leafPath) return false;
+        const { path: sibPath, params: sibParams } = parseNavPath(sib);
+        if (sibPath !== normalizedPathname) return false;
+        const sibKeys = Object.keys(sibParams);
+        if (sibKeys.length === 0) return false;
+        return sibKeys.every((k) => currentParamMap[k] === sibParams[k]);
+      });
+      return !anySpecificSiblingActive;
+    },
+    [normalizedPathname, currentParamMap]
   );
 
-  // Auto-open any section that contains the active route
+  // Auto-open section containing active route ONLY if user hasn't manually opened something
   useEffect(() => {
-    // auto-open section containing active path
     let found: string | null = null;
     navForRole(role).forEach((node: NavNode) => {
       if (found || !node.children) return;
       const leaves = (node.children || []).filter((c: any) =>
         c.roles?.includes(role)
       );
-      if (leaves.some((c: any) => activeMatch(c.path))) {
+      const leafPaths = leaves.map((l: any) => l.path);
+      if (leaves.some((c: any) => isLeafActive(c.path, leafPaths))) {
         found = node.label;
       }
     });
-    setOpenKey((prev) => (found ? found : prev));
-  }, [pathname, role, activeMatch]);
+    if (!openKey && found) setOpenKey(found); // don't override manual toggle
+  }, [pathname, role, isLeafActive, openKey]);
 
   return (
     <aside
@@ -83,6 +131,8 @@ export default function RoleSidebar({ role, onNavigate, className }: Props) {
           if (node.pathByRole) {
             const target = node.pathByRole[role] || "#";
             const needsApi = target === "#";
+            const isActiveSingle =
+              normalizedPathname === target.replace(/\/$/, "");
             return (
               <div key={key}>
                 <Link
@@ -94,7 +144,7 @@ export default function RoleSidebar({ role, onNavigate, className }: Props) {
                   className={cn(
                     "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm border relative overflow-hidden",
                     "before:absolute before:inset-0 before:bg-gradient-to-r before:from-yellow-400/0 before:via-yellow-400/5 before:to-yellow-400/0 before:opacity-0 before:transition-opacity before:duration-500 hover:before:opacity-100",
-                    activeMatch(target)
+                    isActiveSingle
                       ? "bg-zinc-900/60 border-yellow-500/40 shadow-inner shadow-yellow-500/10 ring-1 ring-yellow-500/30"
                       : "border-transparent hover:border-zinc-700/60 hover:bg-zinc-900/40"
                   )}
@@ -102,7 +152,7 @@ export default function RoleSidebar({ role, onNavigate, className }: Props) {
                   <span
                     className={cn(
                       "text-yellow-400 transition-transform duration-300 group-hover:scale-110",
-                      activeMatch(target) && "scale-110"
+                      isActiveSingle && "scale-110"
                     )}
                   >
                     {node.icon}
@@ -120,7 +170,10 @@ export default function RoleSidebar({ role, onNavigate, className }: Props) {
           const leaves = (node.children || []).filter((c: any) =>
             c.roles?.includes(role)
           );
-          const anyActive = leaves.some((c: any) => activeMatch(c.path));
+          const leafPaths = leaves.map((l: any) => l.path);
+          const anyActive = leaves.some((c: any) =>
+            isLeafActive(c.path, leafPaths)
+          );
           return (
             <div key={key} className="relative">
               <button
@@ -176,7 +229,7 @@ export default function RoleSidebar({ role, onNavigate, className }: Props) {
                   >
                     {leaves.map((leaf: any, idx: number) => {
                       const blocked = leaf.path === "#";
-                      const selected = activeMatch(leaf.path);
+                      const selected = isLeafActive(leaf.path, leafPaths);
                       return (
                         <motion.li
                           key={leaf.label}

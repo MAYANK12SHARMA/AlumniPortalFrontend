@@ -300,27 +300,43 @@ class ApiClient {
   async getAlumniDirectory(
     filters: DirectoryFilters
   ): Promise<ApiResponse<any[]>> {
-    const response = await this.client.get("/dashboard/directory/alumni/", {
-      params: filters,
-    });
-    return response;
+    // Primary (new) path includes /dashboard/ segment
+    const primary = "/dashboard/directory/alumni/";
+    const legacy = "/directory/alumni/"; // Fallback for older deployments
+    try {
+      const response = await this.client.get(primary, { params: filters });
+      return response;
+    } catch (err: any) {
+      if (err?.response?.status === 404) {
+        if (process.env.NODE_ENV !== "production") {
+          console.warn(
+            `[api] ${primary} returned 404 – trying legacy path ${legacy}`
+          );
+        }
+        return this.client.get(legacy, { params: filters });
+      }
+      throw err;
+    }
   }
 
   async getStudentDirectory(
     filters: DirectoryFilters
   ): Promise<ApiResponse<any[]>> {
-    // Primary plural endpoint (students)
+    // Primary endpoint (new path)
+    const primary = "/dashboard/directory/student/";
+    // Legacy endpoint observed in production logs (missing /dashboard/ segment)
+    const legacy = "/directory/student/";
     try {
-      const response = await this.client.get("/dashboard/directory/student/", {
-        params: filters,
-      });
+      const response = await this.client.get(primary, { params: filters });
       return response;
     } catch (err: any) {
-      // Fallback to singular path if backend only exposes that
       if (err?.response?.status === 404) {
-        return this.client.get("/dashboard/directory/student/", {
-          params: filters,
-        });
+        if (process.env.NODE_ENV !== "production") {
+          console.warn(
+            `[api] ${primary} returned 404 – trying legacy path ${legacy}`
+          );
+        }
+        return this.client.get(legacy, { params: filters });
       }
       throw err;
     }

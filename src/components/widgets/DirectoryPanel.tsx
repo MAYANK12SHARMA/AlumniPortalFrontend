@@ -18,7 +18,7 @@ export function DirectoryPanel({ kind }: { kind: "alumni" | "students" }) {
     async function load() {
       try {
         const endpoint =
-          kind === "alumni" ? "/directory/alumni/" : "/directory/student/";
+          kind === "alumni" ? "/dashboard/directory/alumni/" : "/dashboard/directory/student/";
         const res = await apiClient.get<any>(endpoint, {
           search,
           page_size: 5, // Reduced to show just a preview
